@@ -1,7 +1,7 @@
 # Maintainer: Daniel Hillenbrand <codeworkx@bbqlinux.org>
 
 pkgname=lightdm-bbqlinux-greeter
-pkgver=1.0.0
+pkgver=1.0.2
 pkgrel=1
 pkgdesc="GTK+ greeter for LightDM"
 arch=('i686' 'x86_64')

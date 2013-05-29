@@ -27,14 +27,6 @@ uname -v = #1 SMP PREEMPT Sat May 25 16:14:55 CEST 2013
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /usr/lib/jvm/java-7-openjdk/bin
-PATH: /android/cm-10.1/out/host/linux-x86/bin
-PATH: /android/cm-10.1/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.6/bin
-PATH: /android/cm-10.1/prebuilts/gcc/linux-x86/mips/mipsel-linux-android-4.6/bin
-PATH: /android/cm-10.1/development/emulator/qtools
-PATH: /android/cm-10.1/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.6/bin
-PATH: /android/cm-10.1/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin
-PATH: /android/cm-10.1/development/scripts
 PATH: /usr/local/bin
 PATH: /usr/bin
 PATH: /bin
