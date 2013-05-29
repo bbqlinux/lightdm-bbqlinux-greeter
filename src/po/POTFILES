@@ -1,0 +1,2 @@
+	../src/lightdm-bbqlinux-greeter.c \
+	../src/lightdm-bbqlinux-greeter.glade

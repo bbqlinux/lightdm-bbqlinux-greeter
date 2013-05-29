@@ -1,0 +1,120 @@
+# Hungarian translation for lightdm
+# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
+# This file is distributed under the same license as the lightdm package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lightdm\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-12 08:51-0400\n"
+"PO-Revision-Date: 2013-05-08 06:41+0000\n"
+"Last-Translator: Gabor Kelemen <kelemeng@gnome.hu>\n"
+"Language-Team: Hungarian <hu@li.org>\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2013-05-10 06:20+0000\n"
+"X-Generator: Launchpad (build 16598)\n"
+
+#: ../src/lightdm-bbqlinux-greeter.c:400
+msgid "Unlock"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:402 ../src/lightdm-bbqlinux-greeter.glade.h:1
+msgid "Log In"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:686
+msgid "Failed to start session"
+msgstr "A munkamenet indítása meghiúsult"
+
+#: ../src/lightdm-bbqlinux-greeter.c:911
+msgid "Incorrect password, please try again"
+msgstr "Hibás jelszó, próbálja újra"
+
+#: ../src/lightdm-bbqlinux-greeter.c:915
+msgid "Failed to authenticate"
+msgstr "A hitelesítés sikertelen"
+
+#: ../src/lightdm-bbqlinux-greeter.c:964 ../src/lightdm-bbqlinux-greeter.c:968
+msgid "Restart"
+msgstr "Újraindítás"
+
+#: ../src/lightdm-bbqlinux-greeter.c:965
+msgid "Are you sure you want to close all programs and restart the computer?"
+msgstr ""
+"Biztos benne, hogy bezárja az összes programot, és újraindítja a "
+"számítógépet?"
+
+#: ../src/lightdm-bbqlinux-greeter.c:966 ../src/lightdm-bbqlinux-greeter.c:1012
+#: ../src/lightdm-bbqlinux-greeter.glade.h:2
+msgid "Cancel"
+msgstr "Mégse"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1010 ../src/lightdm-bbqlinux-greeter.c:1014
+#, fuzzy
+msgid "Shut Down"
+msgstr "Leállítás"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1011
+#, fuzzy
+msgid "Are you sure you want to close all programs and shut down the computer?"
+msgstr ""
+"Biztos benne, hogy bezárja az összes programot, és leállítja a számítógépet?"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1225
+msgid "Guest Account"
+msgstr "Vendég munkamenet"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1233
+msgid "Other..."
+msgstr "Más…"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1618 ../src/lightdm-bbqlinux-greeter.c:1623
+msgid "Enter your password"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:1619 ../src/lightdm-bbqlinux-greeter.c:1624
+msgid "Enter your username"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:3
+msgid "label"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:4
+msgid "Suspend"
+msgstr "Felfüggesztés"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:5
+msgid "Hibernate"
+msgstr "Hibernálás"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:6
+msgid "Restart..."
+msgstr "Újraindítás…"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:7
+#, fuzzy
+msgid "Shut Down..."
+msgstr "Leállítás…"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:8
+msgid "Large Font"
+msgstr "Nagy betűméret"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:9
+msgid "High Contrast"
+msgstr "Nagy kontraszt"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:10
+msgid "On Screen Keyboard"
+msgstr ""
+
+#~ msgid "Return To Login"
+#~ msgstr "Vissza a bejelentkezéshez"
+
+#~ msgid "Login"
+#~ msgstr "Bejelentkezés"

@@ -1,0 +1,603 @@
+2013-05-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Cleanup conf file
+
+2013-05-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update version number for release
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Change shutdown and restart cancel button to Cancel
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Set name for return to login button to cancel_button, rename logo to user_image
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Name shutdown and restart buttons
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	make update-po
+
+2013-05-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Rename menubar and shutdown/restart widgets, improve dialog code a bit
+
+2013-05-11  Sean Davis  <smd.seandavis@gmail.com>
+
+	Some initial cleanup, improve variable names, standardize spacing
+
+2013-05-10  Sean Davis  <smd.seandavis@gmail.com>
+
+	Do not automatically show keyboard
+
+2013-05-10  Simon Steinbeiss  <ochosi@shimmerproject.org>
+
+	Re-add widget-names to glade file to allow proper theming
+
+2013-05-10  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-05-09  Sean Davis  <smd.seandavis@gmail.com>
+
+	Translations update merge
+
+2013-05-09  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-05-09  Sean Davis  <smd.seandavis@gmail.com>
+
+	Allow proper positioning of onboard keyboard
+
+2013-05-08  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add initial support for on-screen keyboard
+
+2013-05-08  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update changelog, make update-po
+
+2013-05-07  Sean Davis  <smd.seandavis@gmail.com>
+
+	Replace Shutdown/shutdown strings in po files to make translations stay the same.
+
+2013-05-07  Sean Davis  <smd.seandavis@gmail.com>
+
+	Use Shut Down instead of shutdown
+
+2013-05-07  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add primary/secondary text and padding to shutdown/restart dialogs
+
+2013-05-07  Sean Davis  <smd.seandavis@gmail.com>
+
+	Use zoom for wallpaper scaling, use non-symbolic restart/shutdown icons for GTK2
+
+2013-05-06  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add login window theming and icons to shutdown and restart.
+
+2013-04-26  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-03-24  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-03-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge lp:~smd-seandavis/lightdm-bbqlinux-greeter/ui-refresh
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add default clock settings.
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Clean up theme template
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix tab order, include panel menubar in tab order
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Use menubar styling across panel by default
+
+2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Use symbolic icons, hide resize grip on panel window.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix GTK+2 compatability.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fallback on first user if previous user is not found.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Cleanup and make other login operable.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add username entry for other.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Make menu items sensitive when not logged in
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add configuration for clock
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Remove deprecated gdk_thread functions from gtk3 code.
+
+2013-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add x-padding to the hostname
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Addition of basic clock.
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add support for gtk2 compilation, but current implementation crashes with gtk2
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Code cleanup, get rid of useless boxes as well.
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Simplify and improve user avatar loading.
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix menu callbacks
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fixed menus
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Simplify loops, fix language code.
+
+2013-03-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Almost there, but this commit does not load session.
+
+2013-03-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Remove references to non-existent widgets, add hostname label back.
+
+2013-03-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix bad merge
+
+2013-03-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge ochosi branch
+
+2013-02-06  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add rounded corners to the loginbox, clean up the glade file, move the session- and language-combos to menus
+	TODO: clean up dropped widgets from .c (prompt_box, login_box), make session- and language-menu work as they should (modify callbacks)
+
+2013-02-01  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Scale the avatar to 64x64px
+
+2013-02-01  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Load logo-widget from builder to actually be able to show avatar
+
+2013-01-31  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Update glade file and add avatar-support to the greeter
+
+2013-03-14  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add todo-list for upcoming UI changes
+
+2013-03-09  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-03-01  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add rounded corners to the login_window widget
+
+2013-02-18  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-02-10  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Merge 78..81 from 1.6
+
+2013-02-10  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-02-10  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Update NEWS for a missing item and fix a typo
+
+2013-02-10  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Reintroduce gtk2 support
+	
+	With a configure flag (--with-gtk2). This will also switch to the gtk2 build
+	of libindicator.
+	
+	Based on a patch received during FOSDEM… I think.
+
+2013-02-09  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Slightly improve user avatar handling
+
+2013-02-09  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Make update-po
+
+2013-02-09  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Fix incomplete previous commit
+
+2013-02-02  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Change button-label from 'Login' to 'Log In'
+
+2013-02-02  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add support for the user-avatar
+
+2013-02-02  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Fix background-display when picture has no alpha channel (LP: #1086199)
+
+2013-01-30  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-01-29  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	update po
+
+2013-01-29  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Update po
+	
+	(I'm fairly sure launchpad is going to overwrite everything tonight, isn't that funny)
+
+2013-01-29  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Compile-in the glade file
+	
+	(so that a missing ui file won't crash the greeter anymore)
+	
+	Also improve a bit the autofoo stuff
+
+2013-01-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Make indicators actually show up in the top panel
+
+2013-01-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	IndicatorObjectEntry is not a GObject, so do the same as indicator-applet
+
+2013-01-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	resync changelog with current dev release
+
+2013-01-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Add experimental libindicator support
+	
+	(untested due to a lack of Ubuntu system for now :)
+
+2013-01-25  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-01-24  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-12-19  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-10-29  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-10-22  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	drop useless rule
+
+2012-10-22  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Generate a proper changelog during dist
+
+2012-10-22  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Fix previous commit
+
+2012-10-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Add basic support for user background
+
+2012-10-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Use new api for autologin
+
+2012-09-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-09-03  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-08-31  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Prepare 1.3.1
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	update fr.po
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	make update-po
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Force refreshing the prompt_box for "Other" after cancel is pressed
+	
+	(so the ui isn't stuck with a broken password prompt when it should be the
+	username prompt)
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Hide the Cancel button, useless with the normal combobox
+	
+	(it's still displayed when the user list is disabled or when "Other" is selected)
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Don't hide the login box when cancel is pressed
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Rename the 'Login' button to 'Unlock' when the user is already logged in
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Drop custom icons now that there's a config option for the icon theme
+
+2012-08-30  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Fix FTBFS when built twice in a row
+
+2012-08-23  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Prepare 1.3.0
+
+2012-08-23  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	refresh po/LINGUAS, useless lp doesn't do it
+
+2012-08-23  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	remove duplicated comment
+
+2012-08-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-07-31  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	remember the last session used
+
+2012-07-31  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	use a known icon name for the accessibility menu
+
+2012-07-31  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	add config option to set the icon theme
+
+2012-07-31  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Add a config option to set the path to the logo image
+
+2012-07-31  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	include patch from the ubuntu package
+
+2012-07-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Replace the userlist's treeview with a combobox
+	
+	And drop the unused pixbuf
+
+2012-07-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Add names to widgets to ease theming
+
+2012-07-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Properly center the login window after a resize
+	
+	(Thanks Esko Järnfors for the patch)
+
+2012-07-28  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Revert "Add the possibilty to specify another greeter.ui path in the configuration file"
+	
+	We're discussing a better method to make both lubuntu and xubuntu happy with that.
+
+2012-07-23  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-07-15  Julien Lavergne  <gilir@ubuntu.com>
+
+	Add the possibilty to specify another greeter.ui path in the configuration file
+
+2012-07-15  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-07-14  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-05-29  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-05-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	Prepare for 1.1.6
+
+2012-05-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	add missing include for setlocale
+
+2012-05-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	fix Cancel button action, and clear the error label
+
+2012-05-21  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	fix 'Large Font' option for fontnames containing spaces
+
+2012-05-13  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-27  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-22  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-04  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-04-03  Lionel Le Folgoc  <mrpouit@ubuntu.com>
+
+	prepare for 1.1.5
+
+2012-03-23  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-03-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-03-20  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+
+	Launchpad automatic translations update.
+
+2012-02-10  Robert Ancell  <robert.ancell@canonical.com>
+
+	Releasing 1.1.4
+
+2012-02-10  Robert Ancell  <robert.ancell@canonical.com>
+
+	Load greeter configuration from correct directory
+
+2012-02-01  Robert Ancell  <robert.ancell@canonical.com>
+
+	Bump version number
+
+2012-02-01  Robert Ancell  <robert.ancell@canonical.com>
+
+	Fix greeter looking for data in the wrong directory
+
+2012-01-31  Robert Ancell  <robert.ancell@canonical.com>
+
+	Bump version number
+
+2012-01-31  Robert Ancell  <robert.ancell@canonical.com>
+
+	Remove deprecated GTK+ functions
+
+2012-01-31  Robert Ancell  <robert.ancell@canonical.com>
+
+	Correctly link against libX11
+
+2012-01-12  Robert Ancell  <robert.ancell@canonical.com>
+
+	Releasing 1.1.1
+
+2012-01-12  Robert Ancell  <robert.ancell@canonical.com>
+
+	Translate login prompts using the translations from PAM
+
+2012-01-06  Gunnar Hjalmarsson  <ubuntu@gunnar.cc>
+
+	Enable translation of prompt_label (LP: #897166).
+
+2011-11-29  Gunnar Hjalmarsson  <ubuntu@gunnar.cc>
+
+	Language chooser modifications:
+	* Handle @variants properly.
+	* Prevent locales from appearing twice in the language chooser.
+
+2011-11-29  Robert Ancell  <robert.ancell@canonical.com>
+
+	Update translation files removing translations that were not part of the GTK greeter
+
+2011-11-29  Robert Ancell  <robert.ancell@canonical.com>
+
+	Add LINGUAS file
+
+2011-11-29  Robert Ancell  <robert.ancell@canonical.com>
+
+	Copy over translations
+
+2011-11-29  Robert Ancell  <robert.ancell@canonical.com>
+
+	Split lightdm-bbqlinux-greeter out of lightdm
+

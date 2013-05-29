@@ -1,0 +1,121 @@
+# Frisian translation for lightdm
+# Copyright (c) 2011 Rosetta Contributors and Canonical Ltd 2011
+# This file is distributed under the same license as the lightdm package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lightdm\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-12 08:51-0400\n"
+"PO-Revision-Date: 2013-05-08 06:39+0000\n"
+"Last-Translator: Sense Egbert Hofstede <u@sensehofstede.nl>\n"
+"Language-Team: Frisian <fy@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2013-05-10 06:20+0000\n"
+"X-Generator: Launchpad (build 16598)\n"
+
+#: ../src/lightdm-bbqlinux-greeter.c:400
+msgid "Unlock"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:402 ../src/lightdm-bbqlinux-greeter.glade.h:1
+msgid "Log In"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:686
+msgid "Failed to start session"
+msgstr "Starten fan sesje mislearre"
+
+#: ../src/lightdm-bbqlinux-greeter.c:911
+msgid "Incorrect password, please try again"
+msgstr "Ferkeard wachtwurd, besykje nochris"
+
+#: ../src/lightdm-bbqlinux-greeter.c:915
+msgid "Failed to authenticate"
+msgstr "Identifisearje mislearre"
+
+#: ../src/lightdm-bbqlinux-greeter.c:964 ../src/lightdm-bbqlinux-greeter.c:968
+msgid "Restart"
+msgstr "Opnij starte"
+
+#: ../src/lightdm-bbqlinux-greeter.c:965
+msgid "Are you sure you want to close all programs and restart the computer?"
+msgstr ""
+"Witte jo it seker dat jo alle programma's wol slute en de kompjûter opnij "
+"wol starte?"
+
+#: ../src/lightdm-bbqlinux-greeter.c:966 ../src/lightdm-bbqlinux-greeter.c:1012
+#: ../src/lightdm-bbqlinux-greeter.glade.h:2
+msgid "Cancel"
+msgstr "Ôfbrekke"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1010 ../src/lightdm-bbqlinux-greeter.c:1014
+#, fuzzy
+msgid "Shut Down"
+msgstr "Ôfslute"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1011
+#, fuzzy
+msgid "Are you sure you want to close all programs and shut down the computer?"
+msgstr ""
+"Witte jo it seker dat jo alle programma's wol slute en de kompjûter opnij "
+"wol starte?"
+
+#: ../src/lightdm-bbqlinux-greeter.c:1225
+msgid "Guest Account"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:1233
+msgid "Other..."
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:1618 ../src/lightdm-bbqlinux-greeter.c:1623
+msgid "Enter your password"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.c:1619 ../src/lightdm-bbqlinux-greeter.c:1624
+msgid "Enter your username"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:3
+msgid "label"
+msgstr ""
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:4
+msgid "Suspend"
+msgstr "Ûnderbrekke"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:5
+msgid "Hibernate"
+msgstr "Sliepe"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:6
+msgid "Restart..."
+msgstr "Opnij starte..."
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:7
+#, fuzzy
+msgid "Shut Down..."
+msgstr "Ôfslute..."
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:8
+msgid "Large Font"
+msgstr "Grut lettertype"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:9
+msgid "High Contrast"
+msgstr "Heech kontrast"
+
+#: ../src/lightdm-bbqlinux-greeter.glade.h:10
+msgid "On Screen Keyboard"
+msgstr ""
+
+#~ msgid "Return To Login"
+#~ msgstr "Nei oanmelden werom gean"
+
+#~ msgid "Login"
+#~ msgstr "Oanmelde"
