@@ -2,6 +2,7 @@
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkWindow" id="login_window">
+    <property name="name">login_window</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="decorated">False</property>
@@ -15,10 +16,8 @@
         <property name="column_spacing">18</property>
         <property name="row_spacing">6</property>
         <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkComboBox" id="user_combobox">
+            <property name="name">user_combobox</property>
             <property name="width_request">200</property>
             <property name="can_focus">True</property>
             <property name="model">user_liststore</property>
@@ -33,6 +32,7 @@
         </child>
         <child>
           <object class="GtkEntry" id="password_entry">
+            <property name="name">prompt_entry</property>
             <property name="width_request">200</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -52,6 +52,7 @@
         </child>
         <child>
           <object class="GtkImage" id="user_image">
+            <property name="name">user_image</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="pixel_size">80</property>
@@ -64,22 +65,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="message_label">
-            <property name="can_focus">False</property>
-            <property name="label" comments="This is a placeholder string and will be replaced with a message from PAM">[message]</property>
-          </object>
-          <packing>
-            <property name="right_attach">2</property>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkHBox" id="hbox2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
               <object class="GtkButton" id="login_button">
+                <property name="name">login_button</property>
                 <property name="label" translatable="yes">Log In</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -96,6 +87,7 @@
             </child>
             <child>
               <object class="GtkButton" id="cancel_button">
+                <property name="name">cancel_button</property>
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -118,6 +110,7 @@
         </child>
         <child>
           <object class="GtkEntry" id="username_entry">
+            <property name="name">prompt_entry</property>
             <property name="can_focus">True</property>
             <property name="no_show_all">True</property>
             <property name="invisible_char">•</property>
@@ -131,10 +124,32 @@
             <property name="bottom_attach">2</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkAlignment" id="infobar_compat">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkLabel" id="message_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" comments="This is a placeholder string and will be replaced with a message from PAM">[message]</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="right_attach">2</property>
+            <property name="top_attach">3</property>
+            <property name="bottom_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
       </object>
     </child>
   </object>
   <object class="GtkWindow" id="panel_window">
+    <property name="name">panel_window</property>
     <property name="can_focus">False</property>
     <property name="decorated">False</property>
     <child>
@@ -170,8 +185,10 @@
         </child>
         <child>
           <object class="GtkMenuBar" id="menubar">
+            <property name="name">menubar</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="take_focus">True</property>
             <property name="pack_direction">rtl</property>
             <signal name="key-press-event" handler="menubar_key_press_cb" swapped="no"/>
             <child>

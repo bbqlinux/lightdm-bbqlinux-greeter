@@ -58,6 +58,7 @@ static GtkImage *user_image;
 static GtkComboBox *user_combo;
 static GtkEntry *username_entry, *password_entry;
 static GtkLabel *message_label;
+static GtkInfoBar *info_bar;
 static GtkButton *cancel_button, *login_button;
 
 static gchar *clock_format;
@@ -383,7 +384,7 @@ set_language (const gchar *language)
 static void
 set_message_label (const gchar *text)
 {
-    gtk_widget_set_visible (GTK_WIDGET (message_label), strcmp (text, "") != 0);
+    gtk_widget_set_visible (GTK_WIDGET (info_bar), strcmp (text, "") != 0);
     gtk_label_set_text (message_label, text);
 }
 
@@ -830,6 +831,7 @@ user_combobox_active_changed_cb (GtkComboBox *widget, LightDMGreeter *greeter)
         set_login_button_label (user);
         set_user_background (user);
         set_user_image (user);
+        gtk_widget_set_tooltip_text (GTK_WIDGET (user_combo), user);
         start_authentication (user);
         g_free (user);
     }
@@ -1263,6 +1265,7 @@ load_user_list ()
                     set_login_button_label (selected_user);
                     set_user_background (selected_user);
                     set_user_image (selected_user);
+                    gtk_widget_set_tooltip_text (GTK_WIDGET (user_combo), selected_user);
                     start_authentication (selected_user);
                     break;
                 }
@@ -1276,6 +1279,7 @@ load_user_list ()
             set_login_button_label (name);
             set_user_background (name);
             set_user_image (name);
+            gtk_widget_set_tooltip_text (GTK_WIDGET (user_combo), name);
             start_authentication (name);
             g_free(name);
         }
@@ -1422,7 +1426,7 @@ main (int argc, char **argv)
     GtkBuilder *builder;
     const GList *items, *item;
     GtkCellRenderer *renderer;
-    GtkWidget *menuitem, *image;
+    GtkWidget *menuitem, *image, *infobar_compat, *content_area;
     gchar *value, *state_dir;
 #if GTK_CHECK_VERSION (3, 0, 0)
     GdkRGBA background_color;
@@ -1604,7 +1608,22 @@ main (int argc, char **argv)
     user_combo = GTK_COMBO_BOX (gtk_builder_get_object (builder, "user_combobox"));
     username_entry = GTK_ENTRY (gtk_builder_get_object (builder, "username_entry"));
     password_entry = GTK_ENTRY (gtk_builder_get_object (builder, "password_entry"));
+    
+    /* Add InfoBar via code for GTK+2 compatability */
+    infobar_compat = GTK_WIDGET(gtk_builder_get_object(builder, "infobar_compat"));
+    info_bar = GTK_INFO_BAR (gtk_info_bar_new());
+    gtk_info_bar_set_message_type(info_bar, GTK_MESSAGE_ERROR);
+    gtk_widget_set_name(GTK_WIDGET(info_bar), "greeter_infobar");
+    content_area = gtk_info_bar_get_content_area(info_bar);
+    
     message_label = GTK_LABEL (gtk_builder_get_object (builder, "message_label"));
+    g_object_ref(message_label);
+    gtk_container_remove(GTK_CONTAINER(infobar_compat), GTK_WIDGET(message_label));
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(message_label));
+    g_object_unref(message_label);
+    
+    gtk_container_add(GTK_CONTAINER(infobar_compat), GTK_WIDGET(info_bar));
+    
     cancel_button = GTK_BUTTON (gtk_builder_get_object (builder, "cancel_button"));
     login_button = GTK_BUTTON (gtk_builder_get_object (builder, "login_button"));
 
@@ -1612,6 +1631,7 @@ main (int argc, char **argv)
 
     /* To maintain compatability with GTK+2, set special properties here */
 #if GTK_CHECK_VERSION (3, 0, 0)
+    gtk_box_set_child_packing(GTK_BOX(content_area), GTK_WIDGET(message_label), TRUE, TRUE, 0, GTK_PACK_START);
     gtk_window_set_has_resize_grip(GTK_WINDOW(panel_window), FALSE);
     gtk_widget_set_margin_top(GTK_WIDGET(user_combo), 12);
     gtk_widget_set_margin_bottom(GTK_WIDGET(password_entry), 12);

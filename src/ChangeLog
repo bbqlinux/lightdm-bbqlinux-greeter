@@ -1,3 +1,55 @@
+2013-06-01  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add widget name back to infobar
+
+2013-06-01  Sean Davis  <smd.seandavis@gmail.com>
+
+	Cleanup unused row in login window
+
+2013-06-01  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix centering with GTK+3
+
+2013-06-01  Sean Davis  <smd.seandavis@gmail.com>
+
+	GTK+2 infobar compatability
+
+2013-05-27  Sean Davis  <smd.seandavis@gmail.com>
+
+	Center infobar contents
+
+2013-05-27  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Drop name of message_label widget so it gets themed by InfoBar
+
+2013-05-26  Sean Davis  <smd.seandavis@gmail.com>
+
+	Add menubar name back to systray
+
+2013-05-26  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Give the infobar-widget a name for theming compatibility
+
+2013-05-26  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Pack the message_label in a gtk-infobar
+
+2013-05-26  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Fix warnings
+
+2013-05-21  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-05-19  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add tooltip on user-combobox that shows username
+
+2013-05-18  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
 2013-05-13  Sean Davis  <smd.seandavis@gmail.com>
 
 	Cleanup conf file
@@ -42,7 +94,7 @@
 
 	Re-add widget-names to glade file to allow proper theming
 
-2013-05-10  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-05-10  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -50,7 +102,7 @@
 
 	Translations update merge
 
-2013-05-09  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-05-09  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -86,21 +138,21 @@
 
 	Add login window theming and icons to shutdown and restart.
 
-2013-04-26  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-04-26  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2013-03-24  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-03-24  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2013-03-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-03-21  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
 2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
 
-	Merge lp:~smd-seandavis/lightdm-bbqlinux-greeter/ui-refresh
+	Merge lp:~smd-seandavis/lightdm-gtk-greeter/ui-refresh
 
 2013-03-17  Sean Davis  <smd.seandavis@gmail.com>
 
@@ -219,7 +271,7 @@
 
 	Add todo-list for upcoming UI changes
 
-2013-03-09  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-03-09  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -227,7 +279,7 @@
 
 	Add rounded corners to the login_window widget
 
-2013-02-18  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-02-18  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -235,7 +287,7 @@
 
 	Merge 78..81 from 1.6
 
-2013-02-10  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-02-10  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -276,7 +328,7 @@
 
 	Fix background-display when picture has no alpha channel (LP: #1086199)
 
-2013-01-30  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-01-30  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -316,19 +368,19 @@
 	
 	(untested due to a lack of Ubuntu system for now :)
 
-2013-01-25  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-01-25  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2013-01-24  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2013-01-24  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-12-19  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-12-19  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-10-29  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-10-29  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -352,15 +404,15 @@
 
 	Use new api for autologin
 
-2012-09-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-09-05  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-09-03  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-09-03  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-08-31  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-08-31  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -417,7 +469,7 @@
 
 	remove duplicated comment
 
-2012-08-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-08-05  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -463,7 +515,7 @@
 	
 	We're discussing a better method to make both lubuntu and xubuntu happy with that.
 
-2012-07-23  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-07-23  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -471,15 +523,15 @@
 
 	Add the possibilty to specify another greeter.ui path in the configuration file
 
-2012-07-15  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-07-15  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-07-14  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-07-14  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-05-29  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-05-29  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -499,27 +551,27 @@
 
 	fix 'Large Font' option for fontnames containing spaces
 
-2012-05-13  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-05-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-04-27  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-04-27  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-04-22  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-04-22  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-04-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-04-21  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-04-05  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-04-05  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-04-04  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-04-04  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -527,15 +579,15 @@
 
 	prepare for 1.1.5
 
-2012-03-23  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-03-23  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-03-21  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-03-21  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
-2012-03-20  Launchpad Translations on behalf of lightdm-bbqlinux-greeter-team
+2012-03-20  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.
 
@@ -599,5 +651,5 @@
 
 2011-11-29  Robert Ancell  <robert.ancell@canonical.com>
 
-	Split lightdm-bbqlinux-greeter out of lightdm
+	Split lightdm-gtk-greeter out of lightdm
 
