@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = lightdm-bbqlinux-greeter
 PACKAGE = lightdm-bbqlinux-greeter
-VERSION = 1.5.2
+VERSION = 1.6.1
 
 SHELL = /bin/sh
 
@@ -37,7 +37,7 @@ DATADIRNAME = share
 itlocaledir = $(prefix)/$(DATADIRNAME)/locale
 subdir = po
 install_sh = ${SHELL} /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/install-sh
-# Automake >= 1.8 provides /usr/bin/mkdir -p.
+# Automake >= 1.8 provides $(MKDIR_P).
 # Until it can be supposed, use the safe fallback:
 mkdir_p = $(install_sh) -d
 
@@ -66,8 +66,8 @@ DISTFILES = Makefile.in.in POTFILES.in $(POFILES)
 EXTRA_DISTFILES = ChangeLog POTFILES.skip Makevars LINGUAS
 
 POTFILES = \
-	../src/lightdm-gtk-greeter.c \
-	../src/lightdm-gtk-greeter.glade
+	../src/lightdm-bbqlinux-greeter.c \
+	../src/lightdm-bbqlinux-greeter.glade
 
 CATALOGS=$(shell LINGUAS="$(USE_LINGUAS)"; for lang in $$LINGUAS; do printf "$$lang.gmo "; done)
 

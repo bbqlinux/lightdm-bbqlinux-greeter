@@ -1,7 +1,7 @@
-# Maintainer: Daniel Hillenbrand <codeworkx@bbqlinux.org>
+# Maintainer: Daniel Hillenbrand <codeworkx [at] bbqlinux [dot] org>
 
 pkgname=lightdm-bbqlinux-greeter
-pkgver=1.6.0
+pkgver=1.6.1
 pkgrel=1
 pkgdesc="GTK2+ greeter for LightDM"
 arch=('i686' 'x86_64')
@@ -9,6 +9,7 @@ url="https://github.com/bbqlinux/lightdm-bbqlinux-greeter"
 license=('GPL3' 'LGPL3')
 depends=('gtk2' 'lightdm>=1.6.0' 'gtk-theme-bbqlinux')
 makedepends=('exo' 'gnome-doc-utils' 'gobject-introspection' 'intltool')
+conflicts=('lightdm-gtk-greeter' 'lightdm-gtk2-greeter-devel')
 backup=('etc/lightdm/lightdm-bbqlinux-greeter.conf')
 
 build() {

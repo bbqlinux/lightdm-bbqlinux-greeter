@@ -3,7 +3,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/stdlib.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/stddef.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/bits/byteswap.h /usr/include/bits/types.h \
@@ -23,18 +23,18 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
  /usr/lib/glib-2.0/include/glibconfig.h \
  /usr/include/glib-2.0/glib/gmacros.h \
- /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include-fixed/limits.h \
- /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include-fixed/syslimits.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h \
  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/posix2_lim.h \
- /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/float.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/float.h \
  /usr/include/glib-2.0/glib/gversionmacros.h \
  /usr/include/glib-2.0/glib/garray.h \
  /usr/include/glib-2.0/glib/gasyncqueue.h \
  /usr/include/glib-2.0/glib/gthread.h \
  /usr/include/glib-2.0/glib/gatomic.h /usr/include/glib-2.0/glib/gerror.h \
- /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/stdarg.h \
+ /usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stdarg.h \
  /usr/include/glib-2.0/glib/gquark.h \
  /usr/include/glib-2.0/glib/gbacktrace.h /usr/include/signal.h \
  /usr/include/bits/signum.h /usr/include/bits/siginfo.h \
@@ -50,6 +50,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/glib-2.0/glib/gdataset.h /usr/include/glib-2.0/glib/gdate.h \
  /usr/include/glib-2.0/glib/gdatetime.h \
  /usr/include/glib-2.0/glib/gtimezone.h /usr/include/glib-2.0/glib/gdir.h \
+ /usr/include/dirent.h /usr/include/bits/dirent.h \
  /usr/include/glib-2.0/glib/genviron.h \
  /usr/include/glib-2.0/glib/gfileutils.h \
  /usr/include/glib-2.0/glib/ggettext.h /usr/include/glib-2.0/glib/ghash.h \
@@ -126,6 +127,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/glib-2.0/gio/gbufferedoutputstream.h \
  /usr/include/glib-2.0/gio/gfilteroutputstream.h \
  /usr/include/glib-2.0/gio/goutputstream.h \
+ /usr/include/glib-2.0/gio/gbytesicon.h \
  /usr/include/glib-2.0/gio/gcancellable.h \
  /usr/include/glib-2.0/gio/gcharsetconverter.h \
  /usr/include/glib-2.0/gio/gconverter.h \
@@ -184,6 +186,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/glib-2.0/gio/gpollableinputstream.h \
  /usr/include/glib-2.0/gio/gpollableoutputstream.h \
  /usr/include/glib-2.0/gio/gpollableutils.h \
+ /usr/include/glib-2.0/gio/gpropertyaction.h \
  /usr/include/glib-2.0/gio/gproxy.h \
  /usr/include/glib-2.0/gio/gproxyaddress.h \
  /usr/include/glib-2.0/gio/gproxyaddressenumerator.h \
@@ -534,6 +537,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/X11/Xutil.h /usr/include/X11/keysym.h \
  /usr/include/X11/keysymdef.h /usr/include/gtk-2.0/gdk/gdkkeysyms.h \
  /usr/include/gtk-2.0/gdk/gdkkeysyms-compat.h \
+ /usr/include/libindicator-0.4/libindicator/indicator-object.h \
  /usr/include/lightdm-gobject-1/lightdm.h \
  /usr/include/lightdm-gobject-1/lightdm/greeter.h \
  /usr/include/lightdm-gobject-1/lightdm/language.h \
@@ -560,7 +564,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/stddef.h:
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h:
 
 /usr/include/bits/waitflags.h:
 
@@ -636,9 +640,9 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/glib-2.0/glib/gmacros.h:
 
-/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include-fixed/limits.h:
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h:
 
-/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include-fixed/syslimits.h:
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h:
 
 /usr/include/limits.h:
 
@@ -650,7 +654,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/bits/posix2_lim.h:
 
-/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/float.h:
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/float.h:
 
 /usr/include/glib-2.0/glib/gversionmacros.h:
 
@@ -664,7 +668,7 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/glib-2.0/glib/gerror.h:
 
-/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include/stdarg.h:
+/usr/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stdarg.h:
 
 /usr/include/glib-2.0/glib/gquark.h:
 
@@ -709,6 +713,10 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 /usr/include/glib-2.0/glib/gtimezone.h:
 
 /usr/include/glib-2.0/glib/gdir.h:
+
+/usr/include/dirent.h:
+
+/usr/include/bits/dirent.h:
 
 /usr/include/glib-2.0/glib/genviron.h:
 
@@ -884,6 +892,8 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/glib-2.0/gio/goutputstream.h:
 
+/usr/include/glib-2.0/gio/gbytesicon.h:
+
 /usr/include/glib-2.0/gio/gcancellable.h:
 
 /usr/include/glib-2.0/gio/gcharsetconverter.h:
@@ -1013,6 +1023,8 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 /usr/include/glib-2.0/gio/gpollableoutputstream.h:
 
 /usr/include/glib-2.0/gio/gpollableutils.h:
+
+/usr/include/glib-2.0/gio/gpropertyaction.h:
 
 /usr/include/glib-2.0/gio/gproxy.h:
 
@@ -1801,6 +1813,8 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 /usr/include/gtk-2.0/gdk/gdkkeysyms.h:
 
 /usr/include/gtk-2.0/gdk/gdkkeysyms-compat.h:
+
+/usr/include/libindicator-0.4/libindicator/indicator-object.h:
 
 /usr/include/lightdm-gobject-1/lightdm.h:
 

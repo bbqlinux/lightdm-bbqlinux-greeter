@@ -1,3 +1,39 @@
+2013-09-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Bump version details
+
+2013-09-17  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix not a prototype error
+
+2013-09-16  Sean Davis  <smd.seandavis@gmail.com>
+
+	Push ochosi's login fix
+
+2013-06-20  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-06-19  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-06-04  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-06-03  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge translations
+
+2013-06-02  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2013-06-03  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update notes and version
+
 2013-06-01  Sean Davis  <smd.seandavis@gmail.com>
 
 	Add widget name back to infobar
