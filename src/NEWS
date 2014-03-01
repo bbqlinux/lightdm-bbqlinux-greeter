@@ -1,3 +1,95 @@
+Overview of changes in lightdm-gtk-greeter 1.8.1
+
+    * Bugs fixed:
+      - Fixed regression with enter not moving username entry to password entry.
+
+Overview of changes in lightdm-gtk-greeter 1.8.0
+
+    * New features:
+      - Configurable screensaver timeout when used as a lock screen (default 
+        is 60 seconds)
+      - A warning is now displayed when attempting to shut down or restart 
+        when other users are logged in.
+      - Improved support for multiple PAM messages.
+      - Improved theming support.
+      - Sample css file to make creating Gtk3 themes easier
+      - New keyboard shortcuts: 
+        - Alt+F4 -- shut down dialog
+        - F9 -- session menu
+        - F10 -- language menu
+        - F11 -- accessibility menu
+        - F12 -- power menu
+    * Bugs fixed:
+      - The PAM message is now reset when the selected user is changed.
+      - The hint style for full in the configuration template is now correct 
+        (hintfull).
+      - Fixed indicator loading with Ubuntu 14.04.
+      - Fixed ability to move top panel in gtk3.
+    * Required configuration changes (please read!):
+      - The "show-language-selector" key is no longer a valid setting, and has 
+        been replaced by "show-indicators"
+      - The "show-indicators" setting now controls the display of all panel 
+        controls. Either comment it out or remove it to get the default controls 
+        (session, language, a11y, power), or define each individually (see the 
+        included lightdm-gtk-greeter.conf template).
+
+Overview of changes in lightdm-gtk-greeter 1.7.1
+
+    * New features:
+      - border-radius property now themeable with CSS
+      - Widgets now support a themed alpha channel
+      - Sessions are now represented by a graphical badge
+      - Languages are now represented by a countrycode label
+    * Bugs fixed:
+      - LP #1266449: greeter crashes on empty username
+      - LP #1264563: switch-to-greeter does not set lock hint
+      - LP #1264771: Password entry box is not defined as invisible in glade definition
+      - LP #1267742: Screen artifacts appear after restart and cold boot
+      - LP #1270530: Login screen has boxes instead of text when font is not set
+    * Additional fixes:
+      - Improved username tooltips
+      - Fixed memory leak in clock feature
+      - Improved xscreensaver timeout functionality
+      - Login button is now the "default" widget
+      - Windows can no longer be positioned off-screen
+
+Overview of changes in lightdm-gtk-greeter 1.7.0
+
+    * New features:
+      - Window positioning (relative or absolute) of the login window and 
+        power dialogs is now configurable in lightdm-gtk-greeter.conf
+      - The default user image is now configurable in lightdm-gtk-greeter.conf
+    * Accessibility improvements:
+      - Onboard on-screen keyboard is now run in xembed mode
+      - Addition of F1, F2, F3 hotkeys for accessibility menu items
+      - Users can now be switched from the username/password entries with 
+        up/down
+      - Restart/Power Off dialogs can now be cancelled with the Escape key
+    * Improvements when used as a Lock Screen:
+      - The screen is now blanked when locked and the greeter is started
+    * Background loading improvements:
+      - The background image is now loaded only once
+      - Memory leaks from pixmaps and X clients have been fixed
+    * Bugs fixed:
+      - Debian #718497: Last PAM error message not showing
+      - Debian #721510: Greeter panel clock fails with long date formats
+      - LP #1031421: Greeter doesn't select user's last session when using 
+        "Other"
+      - LP #1147914: Can't change the login window's position
+      - LP #1191509: Disabling language selector leaves strange artifact on 
+        the screen
+      - LP #1194694: move to password input if <enter> pressed after username input
+      - LP #1231134: support enter key to validate login entry
+      - LP #1232804: Improve "login greeter -> desktop" transition in Xubuntu
+      - LP #1251431: user background gets painted over background specified in 
+        config file
+    * Additional fixes:
+      - Fixed typo in language selection
+      - Fixed keyboard-focus with on-screen keyboard
+    * Many thanks to our contributors for this release, 
+      Alistair Buxton and Andrew P. who provided the majority of the patches and
+      functionality.
+
 Overview of changes in lightdm-gtk-greeter 1.6.1
 
     * Fix inability to change session/languages on logout (lp: #1213837)

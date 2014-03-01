@@ -533,11 +533,11 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
  /usr/include/cairo/cairo-xlib.h /usr/include/cairo/cairo.h \
  /usr/include/X11/Xlib.h /usr/include/X11/X.h \
  /usr/include/X11/Xfuncproto.h /usr/include/X11/Xosdefs.h \
+ /usr/include/sys/wait.h /usr/include/X11/Xatom.h \
  /usr/include/gtk-2.0/gdk/gdkx.h /usr/include/gtk-2.0/gdk/gdkprivate.h \
  /usr/include/X11/Xutil.h /usr/include/X11/keysym.h \
  /usr/include/X11/keysymdef.h /usr/include/gtk-2.0/gdk/gdkkeysyms.h \
  /usr/include/gtk-2.0/gdk/gdkkeysyms-compat.h \
- /usr/include/libindicator-0.4/libindicator/indicator-object.h \
  /usr/include/lightdm-gobject-1/lightdm.h \
  /usr/include/lightdm-gobject-1/lightdm/greeter.h \
  /usr/include/lightdm-gobject-1/lightdm/language.h \
@@ -1800,6 +1800,10 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 
 /usr/include/X11/Xosdefs.h:
 
+/usr/include/sys/wait.h:
+
+/usr/include/X11/Xatom.h:
+
 /usr/include/gtk-2.0/gdk/gdkx.h:
 
 /usr/include/gtk-2.0/gdk/gdkprivate.h:
@@ -1813,8 +1817,6 @@ lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: \
 /usr/include/gtk-2.0/gdk/gdkkeysyms.h:
 
 /usr/include/gtk-2.0/gdk/gdkkeysyms-compat.h:
-
-/usr/include/libindicator-0.4/libindicator/indicator-object.h:
 
 /usr/include/lightdm-gobject-1/lightdm.h:
 

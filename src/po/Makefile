@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = lightdm-bbqlinux-greeter
 PACKAGE = lightdm-bbqlinux-greeter
-VERSION = 1.6.1
+VERSION = 1.8.1
 
 SHELL = /bin/sh
 
@@ -66,8 +66,8 @@ DISTFILES = Makefile.in.in POTFILES.in $(POFILES)
 EXTRA_DISTFILES = ChangeLog POTFILES.skip Makevars LINGUAS
 
 POTFILES = \
-	../src/lightdm-bbqlinux-greeter.c \
-	../src/lightdm-bbqlinux-greeter.glade
+	../src/lightdm-gtk-greeter.c \
+	../src/lightdm-gtk-greeter.glade
 
 CATALOGS=$(shell LINGUAS="$(USE_LINGUAS)"; for lang in $$LINGUAS; do printf "$$lang.gmo "; done)
 

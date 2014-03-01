@@ -10,8 +10,14 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define if "$IDO_PKG" is present */
+/* #undef HAVE_LIBIDO */
+
 /* Define if "$INDICATOR_PKG" is present */
-#define HAVE_LIBINDICATOR 1
+/* #undef HAVE_LIBINDICATOR */
+
+/* Define if "libindicator/indicator-ng.h" is present */
+/* #undef HAVE_LIBINDICATOR_NG */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -41,9 +47,6 @@
    */
 #define LT_OBJDIR ".libs/"
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
-
 /* Name of package */
 #define PACKAGE "lightdm-bbqlinux-greeter"
 
@@ -54,7 +57,7 @@
 #define PACKAGE_NAME "lightdm-bbqlinux-greeter"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "lightdm-bbqlinux-greeter 1.6.1"
+#define PACKAGE_STRING "lightdm-bbqlinux-greeter 1.8.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "lightdm-bbqlinux-greeter"
@@ -63,10 +66,13 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.6.1"
+#define PACKAGE_VERSION "1.8.1"
+
+/* Try to start indicator-services */
+/* #undef START_INDICATOR_SERVICES */
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.6.1"
+#define VERSION "1.8.1"
