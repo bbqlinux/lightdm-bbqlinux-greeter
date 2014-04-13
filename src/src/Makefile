@@ -60,10 +60,10 @@ am__make_running_with_option = \
   test $$has_opt = yes
 am__make_dryrun = (target_option=n; $(am__make_running_with_option))
 am__make_keepgoing = (target_option=k; $(am__make_running_with_option))
-pkgdatadir = $(datadir)/lightdm-bbqlinux-greeter
-pkgincludedir = $(includedir)/lightdm-bbqlinux-greeter
-pkglibdir = $(libdir)/lightdm-bbqlinux-greeter
-pkglibexecdir = $(libexecdir)/lightdm-bbqlinux-greeter
+pkgdatadir = $(datadir)/lightdm-gtk-greeter
+pkgincludedir = $(includedir)/lightdm-gtk-greeter
+pkglibdir = $(libdir)/lightdm-gtk-greeter
+pkglibexecdir = $(libexecdir)/lightdm-gtk-greeter
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
@@ -78,7 +78,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
-sbin_PROGRAMS = lightdm-bbqlinux-greeter$(EXEEXT)
+sbin_PROGRAMS = lightdm-gtk-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -97,7 +97,7 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am__objects_1 =
 am_lightdm_gtk_greeter_OBJECTS = $(am__objects_1) \
-	lightdm_gtk_greeter-lightdm-bbqlinux-greeter.$(OBJEXT)
+	lightdm_gtk_greeter-lightdm-gtk-greeter.$(OBJEXT)
 lightdm_gtk_greeter_OBJECTS = $(am_lightdm_gtk_greeter_OBJECTS)
 am__DEPENDENCIES_1 =
 lightdm_gtk_greeter_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -200,12 +200,12 @@ ECHO_T =
 EGREP = /usr/bin/grep -E
 EXEEXT = 
 FGREP = /usr/bin/grep -F
-GETTEXT_PACKAGE = lightdm-bbqlinux-greeter
+GETTEXT_PACKAGE = lightdm-gtk-greeter
 GMODULE_CFLAGS = -pthread -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 GMODULE_LIBS = -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0 
 GMSGFMT = /usr/bin/msgfmt
 GREP = /usr/bin/grep
-GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 
+GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz 
 GTK_LIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype 
 INDICATORDIR = 
 INSTALL = /usr/bin/install -c
@@ -257,13 +257,13 @@ OBJDUMP = objdump
 OBJEXT = o
 OTOOL = 
 OTOOL64 = 
-PACKAGE = lightdm-bbqlinux-greeter
+PACKAGE = lightdm-gtk-greeter
 PACKAGE_BUGREPORT = 
-PACKAGE_NAME = lightdm-bbqlinux-greeter
-PACKAGE_STRING = lightdm-bbqlinux-greeter 1.8.1
-PACKAGE_TARNAME = lightdm-bbqlinux-greeter
+PACKAGE_NAME = lightdm-gtk-greeter
+PACKAGE_STRING = lightdm-gtk-greeter 1.8.4
+PACKAGE_TARNAME = lightdm-gtk-greeter
 PACKAGE_URL = 
-PACKAGE_VERSION = 1.8.1
+PACKAGE_VERSION = 1.8.4
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -275,7 +275,7 @@ SHELL = /bin/sh
 STRIP = strip
 UNITY_INDICATORDIR = 
 USE_NLS = yes
-VERSION = 1.8.1
+VERSION = 1.8.4
 WARN_CFLAGS =  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs 
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/src
@@ -333,19 +333,19 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 lightdm_gtk_greeter_built_sources = \
-	lightdm-bbqlinux-greeter-ui.h
+	lightdm-gtk-greeter-ui.h
 
 lightdm_gtk_greeter_SOURCES = \
 	$(lightdm_gtk_greeter_built_sources) \
-	lightdm-bbqlinux-greeter.c
+	lightdm-gtk-greeter.c
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DHAVE_CONFIG_H \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
-	-DGREETER_DATA_DIR=\""$(datadir)/lightdm-bbqlinux-greeter"\" \
-	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/lightdm-bbqlinux-greeter.conf"\" \
+	-DGREETER_DATA_DIR=\""$(datadir)/lightdm-gtk-greeter"\" \
+	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/lightdm-gtk-greeter.conf"\" \
 	-DINDICATOR_DIR=\""$(INDICATORDIR)"\" \
 	-DUNITY_INDICATOR_DIR=\""$(UNITY_INDICATORDIR)"\" \
 	$(WARN_CFLAGS)
@@ -375,7 +375,7 @@ lightdm_gtk_greeter_LDADD = \
 #	$(lightdm_gtk_greeter_built_sources)
 
 EXTRA_DIST = \
-	lightdm-bbqlinux-greeter.glade
+	lightdm-gtk-greeter.glade
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -462,8 +462,8 @@ clean-sbinPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-lightdm-bbqlinux-greeter$(EXEEXT): $(lightdm_gtk_greeter_OBJECTS) $(lightdm_gtk_greeter_DEPENDENCIES) $(EXTRA_lightdm_gtk_greeter_DEPENDENCIES) 
-	@rm -f lightdm-bbqlinux-greeter$(EXEEXT)
+lightdm-gtk-greeter$(EXEEXT): $(lightdm_gtk_greeter_OBJECTS) $(lightdm_gtk_greeter_DEPENDENCIES) $(EXTRA_lightdm_gtk_greeter_DEPENDENCIES) 
+	@rm -f lightdm-gtk-greeter$(EXEEXT)
 	$(AM_V_CCLD)$(lightdm_gtk_greeter_LINK) $(lightdm_gtk_greeter_OBJECTS) $(lightdm_gtk_greeter_LDADD) $(LIBS)
 
 mostlyclean-compile:
@@ -472,7 +472,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Po
+include ./$(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -495,19 +495,19 @@ include ./$(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Po
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(LTCOMPILE) -c -o $@ $<
 
-lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o: lightdm-bbqlinux-greeter.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Tpo -c -o lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o `test -f 'lightdm-bbqlinux-greeter.c' || echo '$(srcdir)/'`lightdm-bbqlinux-greeter.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Tpo $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Po
-#	$(AM_V_CC)source='lightdm-bbqlinux-greeter.c' object='lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o' libtool=no \
+lightdm_gtk_greeter-lightdm-gtk-greeter.o: lightdm-gtk-greeter.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-lightdm-gtk-greeter.o -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Tpo -c -o lightdm_gtk_greeter-lightdm-gtk-greeter.o `test -f 'lightdm-gtk-greeter.c' || echo '$(srcdir)/'`lightdm-gtk-greeter.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Tpo $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Po
+#	$(AM_V_CC)source='lightdm-gtk-greeter.c' object='lightdm_gtk_greeter-lightdm-gtk-greeter.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-lightdm-bbqlinux-greeter.o `test -f 'lightdm-bbqlinux-greeter.c' || echo '$(srcdir)/'`lightdm-bbqlinux-greeter.c
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-lightdm-gtk-greeter.o `test -f 'lightdm-gtk-greeter.c' || echo '$(srcdir)/'`lightdm-gtk-greeter.c
 
-lightdm_gtk_greeter-lightdm-bbqlinux-greeter.obj: lightdm-bbqlinux-greeter.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-lightdm-bbqlinux-greeter.obj -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Tpo -c -o lightdm_gtk_greeter-lightdm-bbqlinux-greeter.obj `if test -f 'lightdm-bbqlinux-greeter.c'; then $(CYGPATH_W) 'lightdm-bbqlinux-greeter.c'; else $(CYGPATH_W) '$(srcdir)/lightdm-bbqlinux-greeter.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Tpo $(DEPDIR)/lightdm_gtk_greeter-lightdm-bbqlinux-greeter.Po
-#	$(AM_V_CC)source='lightdm-bbqlinux-greeter.c' object='lightdm_gtk_greeter-lightdm-bbqlinux-greeter.obj' libtool=no \
+lightdm_gtk_greeter-lightdm-gtk-greeter.obj: lightdm-gtk-greeter.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-lightdm-gtk-greeter.obj -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Tpo -c -o lightdm_gtk_greeter-lightdm-gtk-greeter.obj `if test -f 'lightdm-gtk-greeter.c'; then $(CYGPATH_W) 'lightdm-gtk-greeter.c'; else $(CYGPATH_W) '$(srcdir)/lightdm-gtk-greeter.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Tpo $(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Po
+#	$(AM_V_CC)source='lightdm-gtk-greeter.c' object='lightdm_gtk_greeter-lightdm-gtk-greeter.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-lightdm-bbqlinux-greeter.obj `if test -f 'lightdm-bbqlinux-greeter.c'; then $(CYGPATH_W) 'lightdm-bbqlinux-greeter.c'; else $(CYGPATH_W) '$(srcdir)/lightdm-bbqlinux-greeter.c'; fi`
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-lightdm-gtk-greeter.obj `if test -f 'lightdm-gtk-greeter.c'; then $(CYGPATH_W) 'lightdm-gtk-greeter.c'; else $(CYGPATH_W) '$(srcdir)/lightdm-gtk-greeter.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -726,7 +726,7 @@ uninstall-am: uninstall-sbinPROGRAMS
 	tags tags-am uninstall uninstall-am uninstall-sbinPROGRAMS
 
 
-#lightdm-bbqlinux-greeter-ui.h: $(srcdir)/lightdm-bbqlinux-greeter.glade Makefile
+#lightdm-gtk-greeter-ui.h: $(srcdir)/lightdm-gtk-greeter.glade Makefile
 #	$(AM_V_GEN) exo-csource --static --strip-comments --strip-content --name=lightdm_gtk_greeter_ui $< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

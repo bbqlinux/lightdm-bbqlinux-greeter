@@ -1,0 +1,11 @@
+post_install() {
+  python2 /usr/bin/update-lightdm-conf.py
+}
+
+post_upgrade() {
+  python2 /usr/bin/update-lightdm-conf.py
+}
+
+post_remove() {
+  python2 /usr/bin/update-lightdm-conf.py
+}

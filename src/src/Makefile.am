@@ -1,19 +1,19 @@
-sbin_PROGRAMS = lightdm-bbqlinux-greeter
+sbin_PROGRAMS = lightdm-gtk-greeter
 
 lightdm_gtk_greeter_built_sources = \
-	lightdm-bbqlinux-greeter-ui.h
+	lightdm-gtk-greeter-ui.h
 
 lightdm_gtk_greeter_SOURCES = \
 	$(lightdm_gtk_greeter_built_sources) \
-	lightdm-bbqlinux-greeter.c
+	lightdm-gtk-greeter.c
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DHAVE_CONFIG_H \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
-	-DGREETER_DATA_DIR=\""$(datadir)/lightdm-bbqlinux-greeter"\" \
-	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/lightdm-bbqlinux-greeter.conf"\" \
+	-DGREETER_DATA_DIR=\""$(datadir)/lightdm-gtk-greeter"\" \
+	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/lightdm-gtk-greeter.conf"\" \
 	-DINDICATOR_DIR=\""$(INDICATORDIR)"\" \
 	-DUNITY_INDICATOR_DIR=\""$(UNITY_INDICATORDIR)"\" \
 	$(WARN_CFLAGS)
@@ -38,7 +38,7 @@ lightdm_gtk_greeter_LDADD = \
 
 if MAINTAINER_MODE
 
-lightdm-bbqlinux-greeter-ui.h: $(srcdir)/lightdm-bbqlinux-greeter.glade Makefile
+lightdm-gtk-greeter-ui.h: $(srcdir)/lightdm-gtk-greeter.glade Makefile
 	$(AM_V_GEN) exo-csource --static --strip-comments --strip-content --name=lightdm_gtk_greeter_ui $< >$@
 
 DISTCLEANFILES = \
@@ -50,4 +50,4 @@ BUILT_SOURCES = \
 endif
 
 EXTRA_DIST = \
-	lightdm-bbqlinux-greeter.glade
+	lightdm-gtk-greeter.glade

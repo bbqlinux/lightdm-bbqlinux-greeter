@@ -4,13 +4,13 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
-PKG_NAME="lightdm-bbqlinux-greeter"
+PKG_NAME="lightdm-gtk-greeter"
 REQUIRED_AUTOMAKE_VERSION=1.7
 
 (test -f $srcdir/configure.ac \
   && test -d $srcdir/src) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
-    echo " top-level lightdm-bbqlinux-greeter directory"
+    echo " top-level lightdm-gtk-greeter directory"
     exit 1
 }
 

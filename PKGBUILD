@@ -1,16 +1,17 @@
 # Maintainer: Daniel Hillenbrand <codeworkx [at] bbqlinux [dot] org>
 
 pkgname=lightdm-bbqlinux-greeter
-pkgver=1.8.1
+pkgver=1.8.4
 pkgrel=1
-pkgdesc="GTK2+ greeter for LightDM"
+pkgdesc="GTK+ greeter for LightDM"
 arch=('i686' 'x86_64')
 url="https://github.com/bbqlinux/lightdm-bbqlinux-greeter"
 license=('GPL3' 'LGPL3')
-depends=('gtk2' 'lightdm>=1.6.0' 'gtk-theme-bbqlinux')
+depends=('gtk2' 'lightdm>=1.6.0' 'gtk-theme-bbqlinux' 'python2')
 makedepends=('exo' 'gnome-doc-utils' 'gobject-introspection' 'intltool')
-conflicts=('lightdm-gtk-greeter' 'lightdm-gtk2-greeter-devel')
-backup=('etc/lightdm/lightdm-bbqlinux-greeter.conf')
+conflicts=('lightdm-gtk2-greeter' 'lightdm-gtk3-greeter')
+backup=('etc/lightdm/lightdm-gtk-greeter.conf')
+install=$pkgname.install
 
 build() {
   cd "${srcdir}"
@@ -20,7 +21,12 @@ build() {
 }
 
 package() {
-  cd "${srcdir}"
 
+  cd "${srcdir}"
   make DESTDIR="${pkgdir}" install
+
+  cd "${pkgdir}"
+  mkdir -p usr/bin
+  install -Dm755 "$srcdir/usr/bin/update-lightdm-conf.py" usr/bin/update-lightdm-conf.py
+
 }

@@ -2,7 +2,7 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Gettext package */
-#define GETTEXT_PACKAGE "lightdm-bbqlinux-greeter"
+#define GETTEXT_PACKAGE "lightdm-gtk-greeter"
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
@@ -48,25 +48,25 @@
 #define LT_OBJDIR ".libs/"
 
 /* Name of package */
-#define PACKAGE "lightdm-bbqlinux-greeter"
+#define PACKAGE "lightdm-gtk-greeter"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT ""
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "lightdm-bbqlinux-greeter"
+#define PACKAGE_NAME "lightdm-gtk-greeter"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "lightdm-bbqlinux-greeter 1.8.1"
+#define PACKAGE_STRING "lightdm-gtk-greeter 1.8.4"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "lightdm-bbqlinux-greeter"
+#define PACKAGE_TARNAME "lightdm-gtk-greeter"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.8.1"
+#define PACKAGE_VERSION "1.8.4"
 
 /* Try to start indicator-services */
 /* #undef START_INDICATOR_SERVICES */
@@ -75,4 +75,4 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.8.1"
+#define VERSION "1.8.4"

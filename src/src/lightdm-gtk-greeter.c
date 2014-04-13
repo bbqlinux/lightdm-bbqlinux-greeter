@@ -17,10 +17,13 @@
 #include <stdlib.h>
 #endif
 
+#include <glib-unix.h>
+
 #include <locale.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <cairo-xlib.h>
+#include <sys/mman.h>
 #include <sys/wait.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -48,7 +51,7 @@
 
 #include <lightdm.h>
 
-#include <src/lightdm-bbqlinux-greeter-ui.h>
+#include <src/lightdm-gtk-greeter-ui.h>
 
 static LightDMGreeter *greeter;
 static GKeyFile *state;
@@ -378,6 +381,7 @@ init_indicators (GKeyFile* config)
     GHashTableIter iter;
     gpointer iter_value;
     gboolean inited = FALSE;
+    gboolean fallback = FALSE;
 
 #ifdef START_INDICATOR_SERVICES
     GError *error = NULL;
@@ -385,9 +389,19 @@ init_indicators (GKeyFile* config)
     gchar *INDICATORS_CMD[] = {"init", "--user", "--startup-event", "indicator-services-start", NULL};
 #endif
 
-    if (g_key_file_has_key (config, "greeter", "show-indicators", NULL))
-    {
+    if (g_key_file_has_key (config, "greeter", "indicators", NULL))
+    {   /* no option = default list, empty value = empty list */
+        names = g_key_file_get_string_list (config, "greeter", "indicators", &length, NULL);
+    }
+    else if (g_key_file_has_key (config, "greeter", "show-indicators", NULL))
+    {   /* fallback mode: no option = empty value = default list */
         names = g_key_file_get_string_list (config, "greeter", "show-indicators", &length, NULL);
+        if (length == 0)
+            fallback = TRUE;
+    }
+
+    if (names && !fallback)
+    {
         builtin_items = g_hash_table_new (g_str_hash, g_str_equal);
 
         g_hash_table_insert (builtin_items, "~power", power_menuitem);
@@ -528,6 +542,7 @@ set_session (const gchar *session)
     const gchar *default_session;
     gchar *last_session;
     GList *menu_items, *menu_iter;
+    GList *items, *item;
 #if GTK_CHECK_VERSION (3, 0, 0)
     GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
 #endif
@@ -569,9 +584,26 @@ set_session (const gchar *session)
     last_session = g_key_file_get_value (state, "greeter", "last-session", NULL);
     if (last_session && g_strcmp0 (session, last_session) != 0)
     {
-        set_session (last_session);
-        g_free (last_session);
-        return;
+        /* Go thru all sessions and compare them to our last_session otherwise we can get a segfault
+         * if last_session is set to a non-existing or removed session
+         */
+        items = lightdm_get_sessions ();
+        for (item = items; item; item = item->next)
+        {
+            LightDMSession *session = item->data;
+            gchar *s;
+            gboolean matched;
+            s = g_strdup(lightdm_session_get_key (session));
+            matched = g_strcmp0 (s, last_session) == 0;
+            s = NULL;
+            g_free(s);
+            if (matched)
+            {
+                set_session (last_session);
+                g_free (last_session);
+                return;
+            }
+        }
     }
     g_free (last_session);
     
@@ -1233,7 +1265,7 @@ static void set_displayed_user (LightDMGreeter *greeter, gchar *username)
 
     if (g_strcmp0 (username, "*guest") == 0)
     {
-        user_tooltip = g_strdup(_("Guest Account"));
+        user_tooltip = g_strdup(_("Guest Session"));
     }
 
     set_login_button_label (greeter, username);
@@ -1241,11 +1273,12 @@ static void set_displayed_user (LightDMGreeter *greeter, gchar *username)
     set_user_image (username);
     user = lightdm_user_list_get_user_by_name (lightdm_user_list_get_instance (), username);
     if (user)
-        if (lightdm_user_get_logged_in (user))
-        {
-            set_language (lightdm_user_get_language (user));
-            set_session (lightdm_user_get_session (user));
-        }
+    {
+        set_language (lightdm_user_get_language (user));
+        set_session (lightdm_user_get_session (user));
+    }
+    else
+        set_language (lightdm_language_get_code (lightdm_get_language ()));
     gtk_widget_set_tooltip_text (GTK_WIDGET (user_combo), user_tooltip);
     start_authentication (username);
     g_free (user_tooltip);
@@ -1517,7 +1550,7 @@ show_power_prompt (const gchar* action, const gchar* message, const gchar* icon,
 
     /* Make the dialog themeable and attractive */
 #if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(dialog))), "lightdm-bbqlinux-greeter");
+    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(dialog))), "lightdm-gtk-greeter");
 #endif
     gtk_widget_set_name(dialog, dialog_name);
 #if GTK_CHECK_VERSION (3, 0, 0)
@@ -1656,6 +1689,9 @@ a11y_font_cb (GtkCheckMenuItem *item)
         gchar *font_name, **tokens;
         guint length;
 
+        /* Hide the clock since indicators are about to eat the screen. */
+        gtk_widget_hide(GTK_WIDGET(clock_label));
+
         g_object_get (gtk_settings_get_default (), "gtk-font-name", &font_name, NULL);
         tokens = g_strsplit (font_name, " ", -1);
         length = g_strv_length (tokens);
@@ -1675,7 +1711,11 @@ a11y_font_cb (GtkCheckMenuItem *item)
         g_object_set (gtk_settings_get_default (), "gtk-font-name", font_name, NULL);
     }
     else
+    {
         g_object_set (gtk_settings_get_default (), "gtk-font-name", default_font_name, NULL);
+        /* Show the clock as needed */
+        gtk_widget_show_all(GTK_WIDGET(clock_label));
+    }
 }
 
 void a11y_contrast_cb (GtkCheckMenuItem *item);
@@ -1774,12 +1814,6 @@ a11y_keyboard_cb (GtkCheckMenuItem *item)
 }
 
 static void
-sigterm_cb (int signum)
-{
-    exit (0);
-}
-
-static void
 load_user_list (void)
 {
     const GList *items, *item;
@@ -1811,7 +1845,7 @@ load_user_list (void)
         gtk_list_store_append (GTK_LIST_STORE (model), &iter);
         gtk_list_store_set (GTK_LIST_STORE (model), &iter,
                             0, "*guest",
-                            1, _("Guest Account"),
+                            1, _("Guest Session"),
                             2, PANGO_WEIGHT_NORMAL,
                             -1);
     }
@@ -2122,7 +2156,8 @@ clock_timeout_thread (void)
     
     strftime(time_str, 50, clock_format, timeinfo);
     markup = g_markup_printf_escaped("<b>%s</b>", time_str);
-    gtk_label_set_markup( GTK_LABEL(clock_label), markup );
+    if (g_strcmp0(markup, gtk_label_get_label(GTK_LABEL(clock_label))) != 0)
+        gtk_label_set_markup( GTK_LABEL(clock_label), markup );
     g_free(markup);
     
     return TRUE;
@@ -2239,6 +2274,9 @@ main (int argc, char **argv)
     GPid indicator_pid = 0, spi_pid = 0;
     #endif
 
+    /* Prevent memory from being swapped out, as we are dealing with passwords */
+    mlockall (MCL_CURRENT | MCL_FUTURE);
+
     /* Disable global menus */
     g_unsetenv ("UBUNTU_MENUPROXY");
 
@@ -2248,7 +2286,7 @@ main (int argc, char **argv)
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
-    signal (SIGTERM, sigterm_cb);
+    g_unix_signal_add(SIGTERM, (GSourceFunc)gtk_main_quit, NULL);
 
 #if GTK_CHECK_VERSION (3, 0, 0)
 #else
@@ -2269,7 +2307,7 @@ main (int argc, char **argv)
         g_warning ("Failed to load configuration from %s: %s\n", CONFIG_FILE, error->message);
     g_clear_error (&error);
 
-    state_dir = g_build_filename (g_get_user_cache_dir (), "lightdm-bbqlinux-greeter", NULL);
+    state_dir = g_build_filename (g_get_user_cache_dir (), "lightdm-gtk-greeter", NULL);
     g_mkdir_with_parents (state_dir, 0775);
     state_filename = g_build_filename (state_dir, "state", NULL);
     g_free (state_dir);
@@ -2412,7 +2450,7 @@ main (int argc, char **argv)
     /* Panel */
     panel_window = GTK_WINDOW (gtk_builder_get_object (builder, "panel_window"));
 #if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(panel_window))), "lightdm-bbqlinux-greeter");
+    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(panel_window))), "lightdm-gtk-greeter");
     gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(panel_window))), GTK_STYLE_CLASS_MENUBAR);
     g_signal_connect (G_OBJECT (panel_window), "draw", G_CALLBACK (background_window_draw), NULL);
 #endif
@@ -2463,7 +2501,7 @@ main (int argc, char **argv)
 
     /* To maintain compatability with GTK+2, set special properties here */
 #if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(login_window))), "lightdm-bbqlinux-greeter");
+    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(login_window))), "lightdm-gtk-greeter");
     gtk_box_set_child_packing(GTK_BOX(content_area), GTK_WIDGET(message_label), TRUE, TRUE, 0, GTK_PACK_START);
     gtk_window_set_has_resize_grip(GTK_WINDOW(panel_window), FALSE);
     gtk_widget_set_margin_top(GTK_WIDGET(user_combo), 12);
@@ -2514,11 +2552,13 @@ main (int argc, char **argv)
     }
 
     /* Clock */
-    gtk_widget_set_visible(GTK_WIDGET(clock_label),
-                           g_key_file_get_boolean (config, "greeter", "show-clock", NULL));
+    gtk_widget_set_no_show_all(GTK_WIDGET(clock_label),
+                           !g_key_file_get_boolean (config, "greeter", "show-clock", NULL));
+    gtk_widget_show_all(GTK_WIDGET(clock_label));
     clock_format = g_key_file_get_value (config, "greeter", "clock-format", NULL);
     if (!clock_format)
         clock_format = "%a, %H:%M";
+    clock_timeout_thread();
 
     /* Session menu */
     if (gtk_widget_get_visible (session_menuitem))
@@ -2734,7 +2774,7 @@ main (int argc, char **argv)
     }
     gtk_widget_set_sensitive (keyboard_menuitem, a11y_keyboard_command != NULL);
     gtk_widget_set_visible (keyboard_menuitem, a11y_keyboard_command != NULL);
-    gdk_threads_add_timeout (100, (GSourceFunc) clock_timeout_thread, NULL);
+    gdk_threads_add_timeout (1000, (GSourceFunc) clock_timeout_thread, NULL);
 
     /* focus fix (source: unity-greeter) */
     GdkWindow* root_window = gdk_get_default_root_window ();

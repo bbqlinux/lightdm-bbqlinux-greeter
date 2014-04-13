@@ -60,10 +60,10 @@ am__make_running_with_option = \
   test $$has_opt = yes
 am__make_dryrun = (target_option=n; $(am__make_running_with_option))
 am__make_keepgoing = (target_option=k; $(am__make_running_with_option))
-pkgdatadir = $(datadir)/lightdm-bbqlinux-greeter
-pkgincludedir = $(includedir)/lightdm-bbqlinux-greeter
-pkglibdir = $(libdir)/lightdm-bbqlinux-greeter
-pkglibexecdir = $(libexecdir)/lightdm-bbqlinux-greeter
+pkgdatadir = $(datadir)/lightdm-gtk-greeter
+pkgincludedir = $(includedir)/lightdm-gtk-greeter
+pkglibdir = $(libdir)/lightdm-gtk-greeter
+pkglibexecdir = $(libexecdir)/lightdm-gtk-greeter
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
@@ -80,7 +80,7 @@ build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
 subdir = data
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(dist_config_DATA) $(dist_xgreeters_DATA)
+	$(dist_config_DATA) $(dist_doc_DATA) $(dist_xgreeters_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -146,8 +146,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreetersdir)"
-DATA = $(dist_config_DATA) $(dist_xgreeters_DATA)
+am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(docdir)" \
+	"$(DESTDIR)$(xgreetersdir)"
+DATA = $(dist_config_DATA) $(dist_doc_DATA) $(dist_xgreeters_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -229,12 +230,12 @@ ECHO_T =
 EGREP = /usr/bin/grep -E
 EXEEXT = 
 FGREP = /usr/bin/grep -F
-GETTEXT_PACKAGE = lightdm-bbqlinux-greeter
+GETTEXT_PACKAGE = lightdm-gtk-greeter
 GMODULE_CFLAGS = -pthread -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 GMODULE_LIBS = -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0 
 GMSGFMT = /usr/bin/msgfmt
 GREP = /usr/bin/grep
-GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/harfbuzz -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 
+GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz 
 GTK_LIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype 
 INDICATORDIR = 
 INSTALL = /usr/bin/install -c
@@ -286,13 +287,13 @@ OBJDUMP = objdump
 OBJEXT = o
 OTOOL = 
 OTOOL64 = 
-PACKAGE = lightdm-bbqlinux-greeter
+PACKAGE = lightdm-gtk-greeter
 PACKAGE_BUGREPORT = 
-PACKAGE_NAME = lightdm-bbqlinux-greeter
-PACKAGE_STRING = lightdm-bbqlinux-greeter 1.8.1
-PACKAGE_TARNAME = lightdm-bbqlinux-greeter
+PACKAGE_NAME = lightdm-gtk-greeter
+PACKAGE_STRING = lightdm-gtk-greeter 1.8.4
+PACKAGE_TARNAME = lightdm-gtk-greeter
 PACKAGE_URL = 
-PACKAGE_VERSION = 1.8.1
+PACKAGE_VERSION = 1.8.4
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -304,7 +305,7 @@ SHELL = /bin/sh
 STRIP = strip
 UNITY_INDICATORDIR = 
 USE_NLS = yes
-VERSION = 1.8.1
+VERSION = 1.8.4
 WARN_CFLAGS =  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs 
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/data
@@ -328,7 +329,7 @@ build_vendor = unknown
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
-docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
+docdir = $(datadir)/doc/lightdm-gtk-greeter
 dvidir = ${docdir}
 exec_prefix = ${prefix}
 host = x86_64-unknown-linux-gnu
@@ -363,9 +364,10 @@ top_builddir = ..
 top_srcdir = ..
 SUBDIRS = badges
 xgreetersdir = $(datadir)/xgreeters
-dist_xgreeters_DATA = lightdm-bbqlinux-greeter.desktop
+dist_xgreeters_DATA = lightdm-gtk-greeter.desktop
+dist_doc_DATA = sample-lightdm-gtk-greeter.css
 configdir = $(sysconfdir)/lightdm
-dist_config_DATA = lightdm-bbqlinux-greeter.conf
+dist_config_DATA = lightdm-gtk-greeter.conf
 all: all-recursive
 
 .SUFFIXES:
@@ -426,6 +428,27 @@ uninstall-dist_configDATA:
 	@list='$(dist_config_DATA)'; test -n "$(configdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(configdir)'; $(am__uninstall_files_from_dir)
+install-dist_docDATA: $(dist_doc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(docdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(docdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	done
+
+uninstall-dist_docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(docdir)'; $(am__uninstall_files_from_dir)
 install-dist_xgreetersDATA: $(dist_xgreeters_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_xgreeters_DATA)'; test -n "$(xgreetersdir)" || list=; \
@@ -607,7 +630,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreetersdir)"; do \
+	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(xgreetersdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -660,7 +683,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_configDATA install-dist_xgreetersDATA
+install-data-am: install-dist_configDATA install-dist_docDATA \
+	install-dist_xgreetersDATA
 
 install-dvi: install-dvi-recursive
 
@@ -704,7 +728,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreetersDATA
+uninstall-am: uninstall-dist_configDATA uninstall-dist_docDATA \
+	uninstall-dist_xgreetersDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -713,15 +738,16 @@ uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreetersDATA
 	ctags-am distclean distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_configDATA install-dist_xgreetersDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-dist_configDATA uninstall-dist_xgreetersDATA
+	install-dist_configDATA install-dist_docDATA \
+	install-dist_xgreetersDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-dist_configDATA \
+	uninstall-dist_docDATA uninstall-dist_xgreetersDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

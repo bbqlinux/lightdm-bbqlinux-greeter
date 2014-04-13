@@ -17,9 +17,9 @@
 # We have the following line for use by intltoolize:
 # INTLTOOL_MAKEFILE
 
-GETTEXT_PACKAGE = lightdm-bbqlinux-greeter
-PACKAGE = lightdm-bbqlinux-greeter
-VERSION = 1.8.1
+GETTEXT_PACKAGE = lightdm-gtk-greeter
+PACKAGE = lightdm-gtk-greeter
+VERSION = 1.8.4
 
 SHELL = /bin/sh
 

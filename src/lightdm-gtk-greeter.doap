@@ -4,11 +4,11 @@
          xmlns:gnome="http://api.gnome.org/doap-extensions#"
          xmlns="http://usefulinc.com/ns/doap#">
 
-  <name xml:lang="en">lightdm-bbqlinux-greeter</name>
+  <name xml:lang="en">lightdm-gtk-greeter</name>
   <shortdesc xml:lang="en">LightDM GTK+ Greeter</shortdesc>
-  <homepage rdf:resource="https://launchpad.net/lightdm-bbqlinux-greeter" />
-  <download-page rdf:resource="https://launchpad.net/lightdm-bbqlinux-greeter/+download" />
-  <bug-database rdf:resource="https://bugs.launchpad.net/lightdm-bbqlinux-greeter" />
+  <homepage rdf:resource="https://launchpad.net/lightdm-gtk-greeter" />
+  <download-page rdf:resource="https://launchpad.net/lightdm-gtk-greeter/+download" />
+  <bug-database rdf:resource="https://bugs.launchpad.net/lightdm-gtk-greeter" />
   <category rdf:resource="http://api.gnome.org/doap-extensions#desktop" />
 
   <maintainer>

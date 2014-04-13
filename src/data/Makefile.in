@@ -80,7 +80,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = data
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(dist_config_DATA) $(dist_xgreeters_DATA)
+	$(dist_config_DATA) $(dist_doc_DATA) $(dist_xgreeters_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -146,8 +146,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreetersdir)"
-DATA = $(dist_config_DATA) $(dist_xgreeters_DATA)
+am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(docdir)" \
+	"$(DESTDIR)$(xgreetersdir)"
+DATA = $(dist_config_DATA) $(dist_doc_DATA) $(dist_xgreeters_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -328,7 +329,7 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
-docdir = @docdir@
+docdir = $(datadir)/doc/lightdm-gtk-greeter
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
@@ -363,9 +364,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = badges
 xgreetersdir = $(datadir)/xgreeters
-dist_xgreeters_DATA = lightdm-bbqlinux-greeter.desktop
+dist_xgreeters_DATA = lightdm-gtk-greeter.desktop
+dist_doc_DATA = sample-lightdm-gtk-greeter.css
 configdir = $(sysconfdir)/lightdm
-dist_config_DATA = lightdm-bbqlinux-greeter.conf
+dist_config_DATA = lightdm-gtk-greeter.conf
 all: all-recursive
 
 .SUFFIXES:
@@ -426,6 +428,27 @@ uninstall-dist_configDATA:
 	@list='$(dist_config_DATA)'; test -n "$(configdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(configdir)'; $(am__uninstall_files_from_dir)
+install-dist_docDATA: $(dist_doc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(docdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(docdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	done
+
+uninstall-dist_docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(docdir)'; $(am__uninstall_files_from_dir)
 install-dist_xgreetersDATA: $(dist_xgreeters_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_xgreeters_DATA)'; test -n "$(xgreetersdir)" || list=; \
@@ -607,7 +630,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreetersdir)"; do \
+	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(xgreetersdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -660,7 +683,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_configDATA install-dist_xgreetersDATA
+install-data-am: install-dist_configDATA install-dist_docDATA \
+	install-dist_xgreetersDATA
 
 install-dvi: install-dvi-recursive
 
@@ -704,7 +728,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreetersDATA
+uninstall-am: uninstall-dist_configDATA uninstall-dist_docDATA \
+	uninstall-dist_xgreetersDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -713,15 +738,16 @@ uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreetersDATA
 	ctags-am distclean distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_configDATA install-dist_xgreetersDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-dist_configDATA uninstall-dist_xgreetersDATA
+	install-dist_configDATA install-dist_docDATA \
+	install-dist_xgreetersDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-dist_configDATA \
+	uninstall-dist_docDATA uninstall-dist_xgreetersDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

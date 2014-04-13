@@ -1,3 +1,189 @@
+2014-03-27  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-26  Sean Davis  <smd.seandavis@gmail.com>
+
+	Remove translation template (managed by launchpad), Merge g_unix_signal branch with small fixes
+
+2014-03-26  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Switch from deprecated signal to g_unix_signal_add for proper greeter shutdown (LP #1290575)
+
+2014-03-21  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-20  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-19  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-18  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-17  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-16  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Upload translation template to fix rosetta
+
+2014-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge translations
+
+2014-03-15  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update translation templates
+
+2014-03-13  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS and version number
+
+2014-03-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-11  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge Guest Session text, update translation templates
+
+2014-03-02  Gunnar Hjalmarsson  <gunnarhj@ubuntu.com>
+
+	Replace the label "Guest Account" with "Guest Session".
+
+2014-03-11  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix unclean exit, lp: 1290575
+
+2014-03-09  Sean Davis  <smd.seandavis@gmail.com>
+
+	Install sample css into doc folder
+
+2014-03-08  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update translations template
+
+2014-03-05  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-04  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS again
+
+2014-03-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS
+
+2014-03-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Use the system language by default (LP: #1276072).
+
+2014-03-02  Gunnar Hjalmarsson  <gunnarhj@ubuntu.com>
+
+	Use the system language by default (LP: #1276072).
+
+2014-03-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Increment version number
+
+2014-02-28  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-02-27  Sean Davis  <smd.seandavis@gmail.com>
+
+	
+	
+	Deprecate show-indicators, replace with indicators to improve upgrade path of configuration files pre-1.8 series.
+
+2014-02-25  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Replacing "show-indicators" option with "indicators"
+
+2014-02-25  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix segfault on uninstalled session (fixes fedora: 1002782, possibly lp: 1272910)
+
+2014-02-25  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge preselection-fix branch by thad-fisch
+
+2014-02-22  Thaddäus Tintenfisch  <thad.fisch@gmail.com>
+
+	Always update preselected session and language when another user is selected (LP #1282139)
+
+2014-02-25  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge security fix mlockall by thad-fisch
+
+2014-02-22  Thaddäus Tintenfisch  <thad.fisch@gmail.com>
+
+	Prevent memory from being swapped out
+
+2014-02-23  Sean Davis  <smd.seandavis@gmail.com>
+
+	Gtk 2/3 fix
+
+2014-02-22  Sean Davis  <smd.seandavis@gmail.com>
+
+	Remove deprecated HButtonBox, fix centering, hide clock when going into large font view
+
+2014-02-22  Sean Davis  <smd.seandavis@gmail.com>
+
+	No default label for clock, homogenous panel, hide clock if panel is too large
+
+2014-02-20  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Add a badge for elementary's pantheon session
+
+2014-02-20  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-02-16  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Revert accidental change of previous commit
+
+2014-02-16  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Let gtk_main exit and shut down the greeter properly
+
+2014-02-15  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Call the clock once at init, so that there's no empty label for 1sec
+
+2014-02-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Increase clock timeout to 1 second
+
+2014-02-14  Sean Davis  <smd.seandavis@gmail.com>
+
+	Fix CPU hogging of the clock
+
+2014-02-12  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS and version number
+
 2014-02-12  Sean Davis  <smd.seandavis@gmail.com>
 
 	Add Enter as a means to activate the password entry from the username entry
