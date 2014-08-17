@@ -1,3 +1,83 @@
+2014-05-04  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update version number
+
+2014-05-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS
+
+2014-05-02  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merged zoomed branch
+
+2014-04-07  Thaddäus Tintenfisch  <thad.fisch@gmail.com>
+
+	Adjust interpolation type
+
+2014-04-06  Thaddäus Tintenfisch  <thad.fisch@gmail.com>
+
+	Zoom the background to fit the screen
+
+2014-05-01  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge set_session_check branch
+
+2014-05-01  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Do not treat NULL as valid value
+
+2014-04-30  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	unnecessary changes, cleanup
+
+2014-04-30  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	set_session(): checking for invalid value
+
+2014-05-01  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-04-29  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge get_session fix, update NEWS
+
+2014-04-27  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	current_session and current_language: g_strdup/g_free fix
+
+2014-04-23  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Fix tooltips stealing the focus (LP: #1307764)
+
+2014-04-23  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Fix: tooltips focus
+
+2014-04-17  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-04-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-04-12  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-31  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-30  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-03-29  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update NEWS and version number
+
 2014-03-27  Launchpad Translations on behalf of lightdm-gtk-greeter-team
 
 	Launchpad automatic translations update.

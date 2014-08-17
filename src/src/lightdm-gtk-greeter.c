@@ -514,109 +514,83 @@ init_indicators (GKeyFile* config)
     }
 }
 
+static gboolean
+is_valid_session (GList* items, const gchar* session)
+{
+    for (; items; items = g_list_next (items))
+        if (g_strcmp0 (session, lightdm_session_get_key (items->data)) == 0)
+            return TRUE;
+    return FALSE;
+}
+
 static gchar *
 get_session (void)
 {
-    GList *menu_items, *menu_iter;
-
-    /* if the user manually selected a session, use it */
-    if (current_session)
-        return current_session;
-
-    menu_items = gtk_container_get_children(GTK_CONTAINER(session_menu));
-    
-    for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
-    {
-        if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_iter->data)))
-        {
-            return g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), "session-key"));
-        }
-    }
-
-    return g_strdup (lightdm_greeter_get_default_session_hint (greeter));
+    return g_strdup (current_session);
 }
 
 static void
 set_session (const gchar *session)
 {
-    const gchar *default_session;
-    gchar *last_session;
-    GList *menu_items, *menu_iter;
-    GList *items, *item;
-#if GTK_CHECK_VERSION (3, 0, 0)
-    GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
-#endif
+    gchar *last_session = NULL;
+    GList *sessions = lightdm_get_sessions ();
 
-    if (!gtk_widget_get_visible (session_menuitem))
+    /* Validation */
+    if (!session || !is_valid_session (sessions, session))
     {
-        current_session = g_strdup (session);
-        return;
-    }
-
-    menu_items = gtk_container_get_children(GTK_CONTAINER(session_menu));
-
-    if (session)
-    {
-        for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
+        /* previous session */
+        last_session = g_key_file_get_value (state, "greeter", "last-session", NULL);
+        if (last_session && g_strcmp0 (session, last_session) != 0 &&
+            is_valid_session (sessions, last_session))
+            session = last_session;
+        else
         {
-            gchar *s;
-            gboolean matched;
-            s = g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), "session-key"));
-            matched = g_strcmp0 (s, session) == 0;
-            g_free (s);
-            if (matched)
-            {
-                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
-                current_session = g_strdup(session);
-                /* Set menuitem-image to session-badge */
-#if GTK_CHECK_VERSION (3, 0, 0)
-                if (gtk_icon_theme_has_icon(icon_theme, g_strdup_printf ("%s_badge-symbolic", g_ascii_strdown (session, strlen (session)))))
-                    gtk_image_set_from_icon_name (GTK_IMAGE(session_badge), g_strdup_printf ("%s_badge-symbolic", g_ascii_strdown (session, strlen (session))), GTK_ICON_SIZE_MENU);
-                else
-                    gtk_image_set_from_icon_name (GTK_IMAGE(session_badge), "document-properties-symbolic", GTK_ICON_SIZE_MENU);
-#endif
-                return;
-            }
+            /* default */
+            const gchar* default_session = lightdm_greeter_get_default_session_hint (greeter);
+            if (g_strcmp0 (session, default_session) != 0 &&
+                is_valid_session (sessions, default_session))
+                session = default_session;
+            /* first in the sessions list */
+            else if (sessions)
+                session = lightdm_session_get_key (sessions->data);
+            /* give up */
+            else
+                session = NULL;
         }
     }
-    
-    /* If failed to find this session, then try the previous, then the default */
-    last_session = g_key_file_get_value (state, "greeter", "last-session", NULL);
-    if (last_session && g_strcmp0 (session, last_session) != 0)
+
+    if (gtk_widget_get_visible (session_menuitem))
     {
-        /* Go thru all sessions and compare them to our last_session otherwise we can get a segfault
-         * if last_session is set to a non-existing or removed session
-         */
-        items = lightdm_get_sessions ();
-        for (item = items; item; item = item->next)
+        GList *menu_iter = NULL;
+        GList *menu_items = gtk_container_get_children (GTK_CONTAINER (session_menu));
+        if (session)
         {
-            LightDMSession *session = item->data;
-            gchar *s;
-            gboolean matched;
-            s = g_strdup(lightdm_session_get_key (session));
-            matched = g_strcmp0 (s, last_session) == 0;
-            s = NULL;
-            g_free(s);
-            if (matched)
-            {
-                set_session (last_session);
-                g_free (last_session);
-                return;
-            }
+            for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
+                if (g_strcmp0 (session, g_object_get_data (G_OBJECT (menu_iter->data), "session-key")) == 0)
+                {
+#if GTK_CHECK_VERSION (3, 0, 0)
+                    /* Set menuitem-image to session-badge */
+                    GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
+                    gchar* session_name = g_ascii_strdown (session, -1);
+                    gchar* icon_name = g_strdup_printf ("%s_badge-symbolic", session_name);
+                    g_free (session_name);
+                    if (gtk_icon_theme_has_icon(icon_theme, icon_name))
+                        gtk_image_set_from_icon_name (GTK_IMAGE(session_badge), icon_name, GTK_ICON_SIZE_MENU);
+                    else
+                        gtk_image_set_from_icon_name (GTK_IMAGE(session_badge), "document-properties-symbolic", GTK_ICON_SIZE_MENU);
+                    g_free (icon_name);
+#endif
+                    break;
+                }
         }
+        if (!menu_iter)
+            menu_iter = menu_items;
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
     }
+
+    g_free (current_session);
+    current_session = g_strdup(session);
     g_free (last_session);
-    
-    default_session = lightdm_greeter_get_default_session_hint (greeter);
-    if (default_session && g_strcmp0 (session, default_session) != 0)
-    {
-        set_session (lightdm_greeter_get_default_session_hint (greeter));
-        return;
-    }
-    /* Otherwise just pick the first session */
-    menu_iter = g_list_first(menu_items);
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
-    return;
 }
 
 static gchar *
@@ -626,7 +600,7 @@ get_language (void)
 
     /* if the user manually selected a language, use it */
     if (current_language)
-        return current_language;
+        return g_strdup (current_language);
 
     menu_items = gtk_container_get_children(GTK_CONTAINER(language_menu));    
     for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
@@ -648,6 +622,7 @@ set_language (const gchar *language)
 
     if (!gtk_widget_get_visible (language_menuitem))
     {
+        g_free (current_language);
         current_language = g_strdup (language);
         return;
     }
@@ -666,6 +641,7 @@ set_language (const gchar *language)
             if (matched)
             {
                 gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
+                g_free (current_language);
                 current_language = g_strdup(language);
                 gtk_menu_item_set_label(GTK_MENU_ITEM(language_menuitem),language);
                 return;
@@ -2052,11 +2028,12 @@ static void
 set_background (GdkPixbuf *new_bg)
 {
     GdkRectangle monitor_geometry;
-    GdkPixbuf *bg = NULL;
+    GdkPixbuf *bg = NULL, *p = NULL;
     GSList *iter;
-    gint i, p_height, p_width, height, width;
-    gdouble scale;
-    gint numScreens = 1;
+    gint i, p_height, p_width, offset_x, offset_y;
+    gdouble scale_x, scale_y, scale;
+    GdkInterpType interp_type;
+    gint num_screens = 1;
 
     if (new_bg)
         bg = new_bg;
@@ -2064,16 +2041,16 @@ set_background (GdkPixbuf *new_bg)
         bg = default_background_pixbuf;
 
     #if GDK_VERSION_CUR_STABLE < G_ENCODE_VERSION(3, 10)
-        numScreens = gdk_display_get_n_screens (gdk_display_get_default());
+        num_screens = gdk_display_get_n_screens (gdk_display_get_default ());
     #endif
 
     /* Set the background */
-    for (i = 0; i < numScreens; i++)
+    for (i = 0; i < num_screens; i++)
     {
         GdkScreen *screen;
         cairo_surface_t *surface;
         cairo_t *c;
-        int monitor;
+        gint monitor;
 
         screen = gdk_display_get_screen (gdk_display_get_default (), i);
         surface = create_root_surface (screen);
@@ -2085,41 +2062,48 @@ set_background (GdkPixbuf *new_bg)
 
             if (bg)
             {
-                p_width = gdk_pixbuf_get_width(bg);
-                p_height = gdk_pixbuf_get_height(bg);
+                p_width = gdk_pixbuf_get_width (bg);
+                p_height = gdk_pixbuf_get_height (bg);
 
-                scale = (double)monitor_geometry.width/p_width;
-                height = p_height * scale;
-                width = monitor_geometry.width;
+                scale_x = (gdouble)monitor_geometry.width / p_width;
+                scale_y = (gdouble)monitor_geometry.height / p_height;
 
-                if (height < monitor_geometry.height)
+                if (scale_x < scale_y)
                 {
-                    scale = (double)monitor_geometry.height/p_height;
-                    height = monitor_geometry.height;
-                    width = p_width * scale;
+                    scale = scale_y;
+                    offset_x = (monitor_geometry.width - (p_width * scale)) / 2;
+                    offset_y = 0;
+                }
+                else
+                {
+                    scale = scale_x;
+                    offset_x = 0;
+                    offset_y = (monitor_geometry.height - (p_height * scale)) / 2;
                 }
 
-                GdkPixbuf *p = gdk_pixbuf_scale_simple (bg, width,
-                                                        height, GDK_INTERP_BILINEAR);
-                if (width > monitor_geometry.width)
-                {
-                    GdkPixbuf *tmp = gdk_pixbuf_new_subpixbuf(p, (width-monitor_geometry.width)/2, 0, monitor_geometry.width, monitor_geometry.height);
-                    g_object_unref (p);
-                    p = tmp;
-                }
-                if (!gdk_pixbuf_get_has_alpha (p))
-                {
-                    GdkPixbuf *tmp = gdk_pixbuf_add_alpha (p, FALSE, 255, 255, 255);
-                    g_object_unref (p);
-                    p = tmp;
-                }
+                p = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, gdk_pixbuf_get_bits_per_sample (bg),
+                                    monitor_geometry.width, monitor_geometry.height);
+
+                /* Set interpolation type */
+                if (monitor_geometry.width == p_width && monitor_geometry.height == p_height)
+                    interp_type = GDK_INTERP_NEAREST;
+                else
+                    interp_type = GDK_INTERP_BILINEAR;
+
+                /* Zoom the background pixbuf to fit the screen */
+                gdk_pixbuf_composite (bg, p, 0, 0, monitor_geometry.width, monitor_geometry.height,
+                                      offset_x, offset_y, scale, scale, interp_type, 255);
+
                 gdk_cairo_set_source_pixbuf (c, p, monitor_geometry.x, monitor_geometry.y);
+
                 /* Make the background pixbuf globally accessible so it can be reused for fake transparency */
                 if (background_pixbuf)
-                    g_object_unref(background_pixbuf);                
+                    g_object_unref (background_pixbuf);
+
                 background_pixbuf = p;
             }
-            else {
+            else
+            {
 #if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_cairo_set_source_rgba (c, default_background_color);
 #else
@@ -2128,19 +2112,19 @@ set_background (GdkPixbuf *new_bg)
                 background_pixbuf = NULL;
             }
             cairo_paint (c);
-            iter = g_slist_nth(backgrounds, monitor);
-            gtk_widget_queue_draw(GTK_WIDGET(iter->data));
+            iter = g_slist_nth (backgrounds, monitor);
+            gtk_widget_queue_draw (GTK_WIDGET (iter->data));
         }
 
         cairo_destroy (c);
 
         /* Refresh background */
         gdk_flush ();
-        set_surface_as_root(screen, surface);
-        cairo_surface_destroy(surface);
+        set_surface_as_root (screen, surface);
+        cairo_surface_destroy (surface);
     }
-    gtk_widget_queue_draw(GTK_WIDGET(login_window));
-    gtk_widget_queue_draw(GTK_WIDGET(panel_window));
+    gtk_widget_queue_draw (GTK_WIDGET (login_window));
+    gtk_widget_queue_draw (GTK_WIDGET (panel_window));
 }
 
 static gboolean
@@ -2203,6 +2187,7 @@ focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
         Window keyboard_xid = 0;
         GdkDisplay* display = gdk_x11_lookup_xdisplay (xevent->xmap.display);
         GdkWindow* win = gdk_x11_window_foreign_new_for_display (display, xwin);
+        GdkWindowTypeHint win_type = gdk_window_get_type_hint (win);
 
         /* Check to see if this window is our onboard window, since we don't want to focus it. */
         if (keyboard_win)
@@ -2211,8 +2196,10 @@ focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
 #else
                 keyboard_xid = gdk_x11_drawable_get_xid (keyboard_win);
 #endif
-            
-        if (xwin != keyboard_xid && gdk_window_get_type_hint (win) != GDK_WINDOW_TYPE_HINT_NOTIFICATION)
+
+        if (xwin != keyboard_xid
+            && win_type != GDK_WINDOW_TYPE_HINT_TOOLTIP
+            && win_type != GDK_WINDOW_TYPE_HINT_NOTIFICATION)
         {
             gdk_window_focus (win, GDK_CURRENT_TIME);
             /* Make sure to keep keyboard above */
