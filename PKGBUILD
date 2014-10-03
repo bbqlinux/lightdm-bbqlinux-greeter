@@ -2,7 +2,7 @@
 
 pkgname=lightdm-bbqlinux-greeter
 pkgver=1.8.5
-pkgrel=2
+pkgrel=4
 pkgdesc="GTK+ greeter for LightDM"
 arch=('i686' 'x86_64')
 url="https://github.com/bbqlinux/lightdm-bbqlinux-greeter"
