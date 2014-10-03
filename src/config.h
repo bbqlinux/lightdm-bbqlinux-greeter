@@ -57,7 +57,7 @@
 #define PACKAGE_NAME "lightdm-gtk-greeter"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "lightdm-gtk-greeter 1.8.4"
+#define PACKAGE_STRING "lightdm-gtk-greeter 1.8.5"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "lightdm-gtk-greeter"
@@ -66,7 +66,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.8.4"
+#define PACKAGE_VERSION "1.8.5"
 
 /* Try to start indicator-services */
 /* #undef START_INDICATOR_SERVICES */
@@ -75,4 +75,4 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.8.4"
+#define VERSION "1.8.5"
