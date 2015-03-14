@@ -97,13 +97,15 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am__objects_1 =
 am_lightdm_gtk_greeter_OBJECTS = $(am__objects_1) \
-	lightdm_gtk_greeter-lightdm-gtk-greeter.$(OBJEXT)
+	lightdm_gtk_greeter-lightdm-gtk-greeter.$(OBJEXT) \
+	lightdm_gtk_greeter-greeterbackground.$(OBJEXT) \
+	lightdm_gtk_greeter-greetermenubar.$(OBJEXT)
 lightdm_gtk_greeter_OBJECTS = $(am_lightdm_gtk_greeter_OBJECTS)
 am__DEPENDENCIES_1 =
 lightdm_gtk_greeter_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
@@ -205,8 +207,8 @@ GMODULE_CFLAGS = -pthread -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
 GMODULE_LIBS = -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0 
 GMSGFMT = /usr/bin/msgfmt
 GREP = /usr/bin/grep
-GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz 
-GTK_LIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype 
+GTK_CFLAGS = -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+GTK_LIBS = -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 
 INDICATORDIR = 
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -240,6 +242,8 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIBX11_CFLAGS = 
 LIBX11_LIBS = -lX11 
+LIBXKLAVIER_CFLAGS = 
+LIBXKLAVIER_LIBS = 
 LIGHTDMGOBJECT_CFLAGS = -pthread -I/usr/include/lightdm-gobject-1 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 
 LIGHTDMGOBJECT_LIBS = -llightdm-gobject-1 
 LIPO = 
@@ -260,10 +264,10 @@ OTOOL64 =
 PACKAGE = lightdm-gtk-greeter
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = lightdm-gtk-greeter
-PACKAGE_STRING = lightdm-gtk-greeter 1.8.5
+PACKAGE_STRING = lightdm-gtk-greeter 1.9.0
 PACKAGE_TARNAME = lightdm-gtk-greeter
 PACKAGE_URL = 
-PACKAGE_VERSION = 1.8.5
+PACKAGE_VERSION = 1.9.0
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -275,7 +279,7 @@ SHELL = /bin/sh
 STRIP = strip
 UNITY_INDICATORDIR = 
 USE_NLS = yes
-VERSION = 1.8.5
+VERSION = 1.9.0
 WARN_CFLAGS =  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs 
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/src
@@ -333,11 +337,17 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 lightdm_gtk_greeter_built_sources = \
-	lightdm-gtk-greeter-ui.h
+	lightdm-gtk-greeter-ui.h \
+	lightdm-gtk-greeter-css-fallback.h \
+	lightdm-gtk-greeter-css-application.h
 
 lightdm_gtk_greeter_SOURCES = \
 	$(lightdm_gtk_greeter_built_sources) \
-	lightdm-gtk-greeter.c
+	lightdm-gtk-greeter.c \
+	greeterbackground.c \
+	greeterbackground.h \
+	greetermenubar.c \
+	greetermenubar.h
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
@@ -366,7 +376,8 @@ lightdm_gtk_greeter_LDADD = \
 	$(LIGHTDMGOBJECT_LIBS) \
 	$(LIBX11_LIBS) \
 	$(LIBINDICATOR_LIBS) \
-	$(LIBIDO_LIBS)
+	$(LIBIDO_LIBS) \
+	$(LIBXKLAVIER_LIBS)
 
 #DISTCLEANFILES = \
 #	$(lightdm_gtk_greeter_built_sources)
@@ -375,7 +386,9 @@ lightdm_gtk_greeter_LDADD = \
 #	$(lightdm_gtk_greeter_built_sources)
 
 EXTRA_DIST = \
-	lightdm-gtk-greeter.glade
+	lightdm-gtk-greeter.glade \
+	lightdm-gtk-greeter-fallback.css \
+	lightdm-gtk-greeter-application.css
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -472,6 +485,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Po
+include ./$(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Po
 include ./$(DEPDIR)/lightdm_gtk_greeter-lightdm-gtk-greeter.Po
 
 .c.o:
@@ -508,6 +523,34 @@ lightdm_gtk_greeter-lightdm-gtk-greeter.obj: lightdm-gtk-greeter.c
 #	$(AM_V_CC)source='lightdm-gtk-greeter.c' object='lightdm_gtk_greeter-lightdm-gtk-greeter.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-lightdm-gtk-greeter.obj `if test -f 'lightdm-gtk-greeter.c'; then $(CYGPATH_W) 'lightdm-gtk-greeter.c'; else $(CYGPATH_W) '$(srcdir)/lightdm-gtk-greeter.c'; fi`
+
+lightdm_gtk_greeter-greeterbackground.o: greeterbackground.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-greeterbackground.o -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Tpo -c -o lightdm_gtk_greeter-greeterbackground.o `test -f 'greeterbackground.c' || echo '$(srcdir)/'`greeterbackground.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Tpo $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Po
+#	$(AM_V_CC)source='greeterbackground.c' object='lightdm_gtk_greeter-greeterbackground.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-greeterbackground.o `test -f 'greeterbackground.c' || echo '$(srcdir)/'`greeterbackground.c
+
+lightdm_gtk_greeter-greeterbackground.obj: greeterbackground.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-greeterbackground.obj -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Tpo -c -o lightdm_gtk_greeter-greeterbackground.obj `if test -f 'greeterbackground.c'; then $(CYGPATH_W) 'greeterbackground.c'; else $(CYGPATH_W) '$(srcdir)/greeterbackground.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Tpo $(DEPDIR)/lightdm_gtk_greeter-greeterbackground.Po
+#	$(AM_V_CC)source='greeterbackground.c' object='lightdm_gtk_greeter-greeterbackground.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-greeterbackground.obj `if test -f 'greeterbackground.c'; then $(CYGPATH_W) 'greeterbackground.c'; else $(CYGPATH_W) '$(srcdir)/greeterbackground.c'; fi`
+
+lightdm_gtk_greeter-greetermenubar.o: greetermenubar.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-greetermenubar.o -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Tpo -c -o lightdm_gtk_greeter-greetermenubar.o `test -f 'greetermenubar.c' || echo '$(srcdir)/'`greetermenubar.c
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Tpo $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Po
+#	$(AM_V_CC)source='greetermenubar.c' object='lightdm_gtk_greeter-greetermenubar.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-greetermenubar.o `test -f 'greetermenubar.c' || echo '$(srcdir)/'`greetermenubar.c
+
+lightdm_gtk_greeter-greetermenubar.obj: greetermenubar.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -MT lightdm_gtk_greeter-greetermenubar.obj -MD -MP -MF $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Tpo -c -o lightdm_gtk_greeter-greetermenubar.obj `if test -f 'greetermenubar.c'; then $(CYGPATH_W) 'greetermenubar.c'; else $(CYGPATH_W) '$(srcdir)/greetermenubar.c'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Tpo $(DEPDIR)/lightdm_gtk_greeter-greetermenubar.Po
+#	$(AM_V_CC)source='greetermenubar.c' object='lightdm_gtk_greeter-greetermenubar.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lightdm_gtk_greeter_CFLAGS) $(CFLAGS) -c -o lightdm_gtk_greeter-greetermenubar.obj `if test -f 'greetermenubar.c'; then $(CYGPATH_W) 'greetermenubar.c'; else $(CYGPATH_W) '$(srcdir)/greetermenubar.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -728,6 +771,12 @@ uninstall-am: uninstall-sbinPROGRAMS
 
 #lightdm-gtk-greeter-ui.h: $(srcdir)/lightdm-gtk-greeter.glade Makefile
 #	$(AM_V_GEN) exo-csource --static --strip-comments --strip-content --name=lightdm_gtk_greeter_ui $< >$@
+
+#lightdm-gtk-greeter-css-fallback.h: $(srcdir)/lightdm-gtk-greeter-fallback.css Makefile
+#	$(AM_V_GEN) exo-csource --static --name=lightdm_gtk_greeter_css_fallback $< >$@
+
+#lightdm-gtk-greeter-css-application.h: $(srcdir)/lightdm-gtk-greeter-application.css Makefile
+#	$(AM_V_GEN) exo-csource --static --name=lightdm_gtk_greeter_css_application $< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

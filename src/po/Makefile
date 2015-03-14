@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = lightdm-gtk-greeter
 PACKAGE = lightdm-gtk-greeter
-VERSION = 1.8.5
+VERSION = 1.9.0
 
 SHELL = /bin/sh
 

@@ -1,3 +1,261 @@
+2014-08-20  Sean Davis  <smd.seandavis@gmail.com>
+
+	Updated Makefile.am
+
+2014-08-17  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-08-16  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-08-10  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Drop Gtk2 support, update NEWS and version number
+
+2014-08-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Update NEWS and version number
+
+2014-08-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "GDK_CORE_DEVICE_EVENTS" branch
+
+2014-05-14  Thaddäus Tintenfisch  <thad.fisch@gmail.com>
+
+	Don't use XInput2 to set the root cursor (LP: #1024482)
+
+2014-08-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "states-and-orca" branch
+
+2014-07-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Typo in default .conf
+
+2014-07-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New option: reader (F4 key)
+
+2014-07-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using menu_command_* to handle onboard
+
+2014-07-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New option: a11y-states
+
+2014-08-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "hide-user-image" branch
+
+2014-07-01  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Users combobox: 250px is enough for hide-user-image mode
+
+2014-06-29  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New option: "hide-user-image"
+
+2014-08-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "greeter-background" branch
+
+2014-07-14  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Fixed: lid state event
+
+2014-07-14  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Fixed: possible crash with background=#skip (monitor->background == NULL in this case)
+
+2014-07-14  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Individual monitors configurations moved to separate sections ([monitor: name])
+
+2014-07-04  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	"active-monitor" property: "#lid" tag has been replaced with "lid-monitor" property; new value - "#cursor"
+
+2014-06-30  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	One more check for g_hash_table_lookup
+
+2014-06-30  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	"active-monitor" option: tracking lid state for laptops (dbus and UPower)
+
+2014-06-29  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using GreeterBackground to manage backgrounds
+
+2014-08-07  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-07-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-07-12  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Show password_entry only if needed
+
+2014-06-27  Olivier Martin  <olivier.martin@appnearme.com>
+
+	Hide password for guest session
+
+2014-07-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge branches by olivier-martin
+
+2014-07-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "auth-error-message" branch by olivier-martin
+
+2014-06-28  Olivier Martin  <olivier.martin@appnearme.com>
+
+	authentication_complete_cb(): To not overwrite error message from PAM module
+	
+	The error message "Failed to authenticate" was overwritten the PAM error message.
+	PAM error messages are expected to be more informative than Greeter messages.
+
+2014-07-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "set-message-label-type" branch by olivier-martin
+
+2014-06-27  Olivier Martin  <olivier.martin@appnearme.com>
+
+	set_message_label(): Extended to use the type of the message (ie: INFO or ERROR)
+
+2014-07-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "null-menu_iter" branch by olivier-martin
+
+2014-06-27  Olivier Martin  <olivier.martin@appnearme.com>
+
+	set_session: Ensure menu_items is not NULL
+
+2014-07-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge "libido version check" branch by olivier-martin
+
+2014-06-27  Olivier Martin  <olivier.martin@appnearme.com>
+
+	libido needs to be 13.10
+	
+	ido_init() has been introduced into revision 127 (2013-05-31) which
+	corresponds to libido 13.10.
+
+2014-06-20  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-06-14  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-06-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Updating .glade from previous merge
+
+2014-06-09  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merged "new panel layout" branch
+
+2014-06-08  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using GreeterMenuBar directly in .glade file
+
+2014-06-06  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Gtk2 support
+
+2014-06-06  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	"~text" -> "~~text"
+
+2014-06-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	entry_added() renamed to indicator_entry_added_cb()
+
+2014-05-16  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	More styling, renaming functions and constants
+
+2014-05-14  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	GTK2 compatability
+
+2014-05-13  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Default "indicators" value, cleanup
+
+2014-05-13  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	"Hover" effect for indicators (context class)
+
+2014-05-13  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New menubar layout
+
+2014-06-06  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merged "layout indicator" branch
+
+2014-05-22  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	fallback CSS priority
+
+2014-05-21  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Theming support
+
+2014-05-19  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	lightdm-gtk-greeter.css, default style for layout_menuitem
+
+2014-05-13  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using LightDM API by default
+
+2014-05-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Layouts indicator
+
+2014-06-02  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-05-30  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merged "user-background" branch
+
+2014-03-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New option: "user-background"
+
+2014-05-14  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-05-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-05-11  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Use avatar set in config also without userlist (LP: #1317236)
+
+2014-05-10  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Set user image to default value if greeter-hide-users=true
+
+2014-05-10  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
 2014-05-04  Sean Davis  <smd.seandavis@gmail.com>
 
 	Update version number

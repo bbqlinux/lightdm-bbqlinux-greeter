@@ -20,21 +20,13 @@
 #include <glib-unix.h>
 
 #include <locale.h>
+#include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
-#include <cairo-xlib.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk/gdkx.h>
 #include <glib.h>
-#if GTK_CHECK_VERSION (3, 0, 0)
 #include <gtk/gtkx.h>
-#else
-#include <gdk/gdkkeysyms.h>
-#endif
 #include <glib/gslist.h>
 
 #ifdef HAVE_LIBINDICATOR
@@ -46,29 +38,27 @@
 
 #ifdef HAVE_LIBIDO
 /* Some indicators need ido library */
-#include "libido/libido.h"
+#include <libido/libido.h>
+#endif
+
+#ifdef HAVE_LIBXKLAVIER
+#include <libxklavier/xklavier.h>
 #endif
 
 #include <lightdm.h>
 
-#include <src/lightdm-gtk-greeter-ui.h>
+#include "src/greetermenubar.h"
+#include "src/greeterbackground.h"
+#include "src/lightdm-gtk-greeter-ui.h"
+#include "src/lightdm-gtk-greeter-css-fallback.h"
+#include "src/lightdm-gtk-greeter-css-application.h"
 
 static LightDMGreeter *greeter;
+
+/* State file */
 static GKeyFile *state;
 static gchar *state_filename;
-
-/* Defaults */
-static gchar *default_font_name, *default_theme_name, *default_icon_theme_name;
-static GdkPixbuf *default_background_pixbuf = NULL;
-static GdkPixbuf *background_pixbuf = NULL;
-
-/* Panel Widgets */
-static GtkWindow *panel_window;
-static GtkWidget *clock_label;
-static GtkWidget *menubar, *power_menuitem, *session_menuitem, *language_menuitem, *a11y_menuitem, *session_badge;
-static GtkWidget *suspend_menuitem, *hibernate_menuitem, *restart_menuitem, *shutdown_menuitem;
-static GtkWidget *keyboard_menuitem;
-static GtkMenu *session_menu, *language_menu;
+static void save_state_file (void);
 
 /* Login Window Widgets */
 static GtkWindow *login_window;
@@ -79,45 +69,15 @@ static GtkLabel *message_label;
 static GtkInfoBar *info_bar;
 static GtkButton *cancel_button, *login_button;
 
-static gchar *clock_format;
-static gchar **a11y_keyboard_command;
-static GPid a11y_kbd_pid = 0;
-static GError *a11y_keyboard_error;
-static GtkWindow *onboard_window;
-
-/* Pending Questions */
-static GSList *pending_questions = NULL;
-
-GSList *backgrounds = NULL;
-
-/* Current choices */
-static gchar *current_session;
-static gchar *current_language;
-
-/* Screensaver values */
-int timeout, interval, prefer_blanking, allow_exposures;
-
-#if GTK_CHECK_VERSION (3, 0, 0)
-static GdkRGBA *default_background_color = NULL;
-#else
-static GdkColor *default_background_color = NULL;
-#endif
-static gboolean cancelling = FALSE, prompted = FALSE;
-static gboolean prompt_active = FALSE, password_prompted = FALSE;
-#if GTK_CHECK_VERSION (3, 0, 0)
-#else
-static GdkRegion *window_region = NULL;
-#endif
-
-typedef struct
-{
-  gboolean is_prompt;
-  union {
-    LightDMMessageType message;
-    LightDMPromptType prompt;
-  } type;
-  gchar *text;
-} PAMConversationMessage;
+/* Panel Widgets */
+static GtkWindow *panel_window;
+static GtkWidget *menubar;
+static GtkWidget *power_menuitem, *session_menuitem, *language_menuitem, *a11y_menuitem,
+                 *layout_menuitem, *clock_menuitem, *host_menuitem;
+static GtkWidget *suspend_menuitem, *hibernate_menuitem, *restart_menuitem, *shutdown_menuitem;
+static GtkWidget *contrast_menuitem, *font_menuitem, *keyboard_menuitem, *reader_menuitem;
+static GtkWidget *clock_label, *session_badge;
+static GtkMenu *session_menu, *language_menu, *layout_menu;
 
 typedef struct
 {
@@ -135,11 +95,315 @@ typedef struct
     DimensionPosition x, y;
 } WindowPosition;
 
-const WindowPosition CENTERED_WINDOW_POS = { .x = {50, +1, TRUE, 0}, .y = {50, +1, TRUE, 0} };
-WindowPosition main_window_pos;
+/* Function translate user defined coordinates to absolute value */
+static gint get_absolute_position (const DimensionPosition *p, gint screen, gint window);
+static const WindowPosition WINDOW_POS_CENTER   = {.x = { 50, +1, TRUE,   0}, .y = { 50, +1, TRUE,   0}};
+static const WindowPosition WINDOW_POS_TOP_LEFT = {.x = {  0, +1, FALSE, -1}, .y = {  0, +1, FALSE, -1}};
+static const WindowPosition ONBOARD_WINDOW_POS  = {.x = { 50, +1, TRUE,   0}, .y = {  0, -1, FALSE, +1}};
+static const WindowPosition ONBOARD_WINDOW_SIZE = {.x = {610,  0, FALSE,  0}, .y = {210,  0, FALSE,  0}};
+static WindowPosition main_window_pos;
+static WindowPosition panel_window_pos;
 
-GdkPixbuf* default_user_pixbuf = NULL;
-gchar* default_user_icon = "avatar-default";
+static gchar *default_font_name, *default_theme_name, *default_icon_theme_name;
+static gchar *clock_format;
+static GdkPixbuf *default_user_pixbuf = NULL;
+static gchar *default_user_icon = "avatar-default";
+
+typedef struct
+{
+    gchar **argv;
+    gint argc;
+
+    GPid pid;
+    GtkWidget *menu_item;
+    GtkWidget *widget;
+} MenuCommand;
+
+static MenuCommand *menu_command_parse (const gchar *value, GtkWidget *menu_item);
+static MenuCommand *menu_command_parse_extended (const gchar *value, GtkWidget *menu_item,
+                                                       const gchar *xid_supported, const gchar *xid_arg,
+                                                       const WindowPosition *size);
+static gboolean menu_command_run (MenuCommand *command);
+static gboolean menu_command_stop (MenuCommand *command);
+static void command_terminated_cb (GPid pid, gint status, MenuCommand *command);
+
+static MenuCommand *a11y_keyboard_command;
+static MenuCommand *a11y_reader_command;
+
+static void a11y_menuitem_toggled_cb (GtkCheckMenuItem *item, const gchar* name);
+
+/* Pending Questions */
+static GSList *pending_questions = NULL;
+
+/* Current choices */
+static gchar *current_session;
+static gchar *current_language;
+
+/* Screensaver values */
+static int timeout, interval, prefer_blanking, allow_exposures;
+
+static GreeterBackground *greeter_background;
+
+static gboolean cancelling = FALSE, prompted = FALSE;
+static gboolean prompt_active = FALSE, password_prompted = FALSE;
+
+typedef struct
+{
+    gboolean is_prompt;
+    union
+    {
+        LightDMMessageType message;
+        LightDMPromptType prompt;
+    } type;
+    gchar *text;
+} PAMConversationMessage;
+
+static const gchar *LANGUAGE_DATA_CODE = "language-code";
+static const gchar *SESSION_DATA_KEY = "session-key";
+static const gchar *LAYOUT_DATA_LABEL = "layout-label";
+#ifdef HAVE_LIBXKLAVIER
+static const gchar *LAYOUT_DATA_GROUP = "layout-group";
+#else
+static const gchar *LAYOUT_DATA_NAME = "layout-name";
+#endif
+
+#ifdef HAVE_LIBXKLAVIER
+static XklEngine *xkl_engine;
+#endif
+
+typedef enum
+{
+    PANEL_ITEM_INDICATOR,
+    PANEL_ITEM_SPACER,
+    PANEL_ITEM_SEPARATOR,
+    PANEL_ITEM_TEXT
+} GreeterPanelItemType;
+
+static const gchar *PANEL_ITEM_STYLE = "panel-item";
+static const gchar *PANEL_ITEM_STYLE_HOVERED = "panel-item-hovered";
+static const gchar *PANEL_ITEM_STYLES[] = 
+{
+    "panel-item-indicator",
+    "panel-item-spacer",
+    "panel-item-separator",
+    "panel-item-text"
+};
+
+static const gchar *PANEL_ITEM_DATA_INDEX = "panel-item-data-index";
+
+#ifdef HAVE_LIBINDICATOR
+static const gchar *INDICATOR_ITEM_DATA_OBJECT    = "indicator-item-data-object";
+static const gchar *INDICATOR_ITEM_DATA_ENTRY     = "indicator-item-data-entry";
+static const gchar *INDICATOR_ITEM_DATA_BOX       = "indicator-item-data-box";
+static const gchar *INDICATOR_DATA_MENUITEMS      = "indicator-data-menuitems";
+#endif
+
+static gboolean
+key_file_get_boolean_extended (GKeyFile *key_file, const gchar *group_name, const gchar *key, gboolean default_value)
+{
+    GError* error = NULL;
+    gboolean result = g_key_file_get_boolean (key_file, group_name, key, &error);
+    if (error)
+    {
+        g_clear_error (&error);
+        return default_value;
+    }
+    return result;
+}
+
+static void
+save_state_file (void)
+{
+    GError *error = NULL;
+    gsize data_length = 0;
+    gchar *data = g_key_file_to_data (state, &data_length, &error);
+
+    if (error)
+    {
+        g_warning ("Failed to save state file: %s", error->message);
+        g_clear_error (&error);
+    }
+
+    if (data)
+    {
+        g_file_set_contents (state_filename, data, data_length, &error);
+        if (error)
+        {
+            g_warning ("Failed to save state file: %s", error->message);
+            g_clear_error (&error);
+        }
+        g_free (data);
+    }
+}
+
+/* MenuCommand */
+
+static MenuCommand*
+menu_command_parse (const gchar *value, GtkWidget *menu_item)
+{
+    return menu_command_parse_extended (value, menu_item, NULL, NULL, NULL);
+}
+
+static MenuCommand*
+menu_command_parse_extended (const gchar *value, GtkWidget *menu_item,
+                             const gchar *xid_supported, const gchar *xid_arg,
+                             const WindowPosition *size)
+{
+    if (!value)
+        return NULL;
+
+    GError *error = NULL;
+    gchar **argv;
+    gint argc = 0;
+
+    if (!g_shell_parse_argv (value, &argc, &argv, &error))
+    {
+        if (error)
+            g_warning ("Failed to parse command line: %s", error->message);
+        g_clear_error (&error);
+        return NULL;
+    }
+
+    MenuCommand *command = g_new0 (MenuCommand, 1);
+    command->menu_item = menu_item;
+    command->argc = argc;
+    command->argv = argv;
+
+    if (g_strcmp0 (argv[0], xid_supported) == 0)
+    {
+        gboolean have_xid_arg = FALSE;
+        gint i;
+        for (i = 1; i < argc; ++i)
+            if (g_strcmp0 (argv[i], xid_arg) == 0)
+            {
+                have_xid_arg = TRUE;
+                break;
+            }
+        if (!have_xid_arg)
+        {
+            gchar *new_value = g_strdup_printf ("%s %s", value, xid_arg);
+
+            if (g_shell_parse_argv (new_value, &argc, &argv, &error))
+            {
+                g_strfreev (command->argv);
+                command->argc = argc;
+                command->argv = argv;
+                have_xid_arg = TRUE;
+            }
+            else
+            {
+                if (error)
+                    g_warning ("Failed to parse command line: %s", error->message);
+                g_clear_error (&error);
+            }
+            g_free (new_value);
+        }
+
+        if (have_xid_arg)
+        {
+            GdkRectangle screen;
+            command->widget = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+            gdk_screen_get_monitor_geometry (gdk_screen_get_default (),
+                                             /* must be replaced with background->active_monitor */
+                                             gdk_screen_get_primary_monitor (gdk_screen_get_default ()),
+                                             &screen);
+            gtk_widget_set_size_request (command->widget,
+                                         get_absolute_position (&size->x, screen.width, 0),
+                                         get_absolute_position (&size->y, screen.height, 0));
+        }
+    }
+    return command;
+}
+
+static gboolean
+menu_command_run (MenuCommand *command)
+{
+    g_return_val_if_fail (command && g_strv_length (command->argv), FALSE);
+
+    GError *error = NULL;
+    gboolean spawned = FALSE;
+    if (command->widget)
+    {
+        GtkSocket* socket = NULL;
+        gint out_fd = 0;
+
+        if (g_spawn_async_with_pipes (NULL, command->argv, NULL, G_SPAWN_SEARCH_PATH,
+                                      NULL, NULL, &command->pid, NULL, &out_fd, NULL, &error))
+        {
+            gchar* text = NULL;
+            GIOChannel* out_channel = g_io_channel_unix_new (out_fd);
+            if (g_io_channel_read_line (out_channel, &text, NULL, NULL, &error) == G_IO_STATUS_NORMAL)
+            {
+                gchar* end_ptr = NULL;
+
+                text = g_strstrip (text);
+                gint id = g_ascii_strtoll (text, &end_ptr, 0);
+
+                if (id != 0 && end_ptr > text)
+                {
+                    socket = GTK_SOCKET (gtk_socket_new ());
+                    gtk_container_add (GTK_CONTAINER (command->widget), GTK_WIDGET (socket));
+                    gtk_socket_add_id (socket, id);
+                    gtk_widget_show_all (GTK_WIDGET (command->widget));
+                    spawned = TRUE;
+                }
+                else
+                    g_warning ("Failed to get '%s' socket: unrecognized output", command->argv[0]);
+
+                g_free(text);
+            }
+        }
+    }
+    else
+    {
+        spawned = g_spawn_async (NULL, command->argv, NULL,
+                                 G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
+                                 NULL, NULL, &command->pid, &error);
+        if (spawned)
+            g_child_watch_add (command->pid, (GChildWatchFunc)command_terminated_cb, command);
+    }
+
+    if(!spawned)
+    {
+        if (error)
+            g_warning ("Command spawning error: '%s'", error->message);
+        command->pid = 0;
+        gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (command->menu_item), FALSE);
+    }
+    g_clear_error(&error);
+    return spawned;
+}
+
+static gboolean
+menu_command_stop (MenuCommand *command)
+{
+    g_return_val_if_fail (command, FALSE);
+
+    if (command->pid)
+    {
+        kill (command->pid, SIGTERM);
+        g_spawn_close_pid (command->pid);
+        command->pid = 0;
+        if (command->menu_item)
+            gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (command->menu_item), FALSE);
+        if (command->widget)
+            gtk_widget_hide (command->widget);
+    }
+    return TRUE;
+}
+
+static void
+command_terminated_cb (GPid pid, gint status, MenuCommand *command)
+{
+    menu_command_stop (command);
+}
+
+static void
+a11y_menuitem_toggled_cb (GtkCheckMenuItem *item, const gchar* name)
+{
+    g_key_file_set_boolean (state, "a11y-states", name, gtk_check_menu_item_get_active (item));
+    save_state_file ();
+}
 
 static void
 pam_message_finalize (PAMConversationMessage *message)
@@ -148,35 +412,56 @@ pam_message_finalize (PAMConversationMessage *message)
     g_free (message);
 }
 
+static gboolean
+panel_item_enter_notify_cb (GtkWidget *widget, GdkEvent *event, gpointer enter)
+{
+    GtkStyleContext *context = gtk_widget_get_style_context (widget);
+    if (GPOINTER_TO_INT (enter))
+        gtk_style_context_add_class (context, PANEL_ITEM_STYLE_HOVERED);
+    else
+        gtk_style_context_remove_class (context, PANEL_ITEM_STYLE_HOVERED);
+    return FALSE;
+}
 
 static void
-add_indicator_to_panel (GtkWidget *indicator_item, gint index)
+panel_add_item (GtkWidget *widget, gint index, GreeterPanelItemType item_type)
 {
     gint insert_pos = 0;
     GList* items = gtk_container_get_children (GTK_CONTAINER (menubar));
     GList* item;
     for (item = items; item; item = item->next)
     {
-        if (GPOINTER_TO_INT (g_object_get_data (G_OBJECT (item->data), "indicator-custom-index-data")) < index)
+        if (GPOINTER_TO_INT (g_object_get_data (G_OBJECT (item->data), PANEL_ITEM_DATA_INDEX)) < index)
             break;
         insert_pos++;
     }
     g_list_free (items);
 
-    gtk_menu_shell_insert (GTK_MENU_SHELL (menubar), GTK_WIDGET (indicator_item), insert_pos);
+    gtk_style_context_add_class (gtk_widget_get_style_context (widget), PANEL_ITEM_STYLE);
+    gtk_style_context_add_class (gtk_widget_get_style_context (widget), PANEL_ITEM_STYLES[item_type]);
+    if (item_type == PANEL_ITEM_INDICATOR)
+    {
+        g_signal_connect (G_OBJECT (widget), "enter-notify-event",
+                          G_CALLBACK (panel_item_enter_notify_cb), GINT_TO_POINTER(TRUE));
+        g_signal_connect (G_OBJECT (widget), "leave-notify-event",
+                          G_CALLBACK (panel_item_enter_notify_cb), GINT_TO_POINTER(FALSE));
+    }
+
+    gtk_widget_show (widget);
+    gtk_menu_shell_insert (GTK_MENU_SHELL (menubar), widget, insert_pos);
 }
 
 #ifdef HAVE_LIBINDICATOR
 static gboolean
-entry_scrolled (GtkWidget *menuitem, GdkEventScroll *event, gpointer data)
+indicator_entry_scrolled_cb (GtkWidget *menuitem, GdkEventScroll *event, gpointer data)
 {
     IndicatorObject      *io;
     IndicatorObjectEntry *entry;
 
     g_return_val_if_fail (GTK_IS_WIDGET (menuitem), FALSE);
 
-    io = g_object_get_data (G_OBJECT (menuitem), "indicator-custom-object-data");
-    entry = g_object_get_data (G_OBJECT (menuitem), "indicator-custom-entry-data");
+    io = g_object_get_data (G_OBJECT (menuitem), INDICATOR_ITEM_DATA_OBJECT);
+    entry = g_object_get_data (G_OBJECT (menuitem), INDICATOR_ITEM_DATA_ENTRY);
 
     g_return_val_if_fail (INDICATOR_IS_OBJECT (io), FALSE);
 
@@ -187,15 +472,15 @@ entry_scrolled (GtkWidget *menuitem, GdkEventScroll *event, gpointer data)
 }
 
 static void
-entry_activated (GtkWidget *widget, gpointer user_data)
+indicator_entry_activated_cb (GtkWidget *widget, gpointer user_data)
 {
     IndicatorObject      *io;
     IndicatorObjectEntry *entry;
 
     g_return_if_fail (GTK_IS_WIDGET (widget));
 
-    io = g_object_get_data (G_OBJECT (widget), "indicator-custom-object-data");
-    entry = g_object_get_data (G_OBJECT (widget), "indicator-custom-entry-data");
+    io = g_object_get_data (G_OBJECT (widget), INDICATOR_ITEM_DATA_OBJECT);
+    entry = g_object_get_data (G_OBJECT (widget), INDICATOR_ITEM_DATA_ENTRY);
 
     g_return_if_fail (INDICATOR_IS_OBJECT (io));
 
@@ -203,27 +488,22 @@ entry_activated (GtkWidget *widget, gpointer user_data)
 }
 
 static GtkWidget*
-create_menuitem (IndicatorObject *io, IndicatorObjectEntry *entry, GtkWidget *menubar)
+indicator_entry_create_menuitem (IndicatorObject *io, IndicatorObjectEntry *entry, GtkWidget *menubar)
 {
     GtkWidget *box, *menuitem;
-    gint index = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (io), "indicator-custom-index-data"));
-
-#if GTK_CHECK_VERSION (3, 0, 0)
+    gint index = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (io), PANEL_ITEM_DATA_INDEX));
     box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
-#else
-    box = gtk_hbox_new (FALSE, 0);
-#endif
     menuitem = gtk_menu_item_new ();
 
     gtk_widget_add_events(GTK_WIDGET(menuitem), GDK_SCROLL_MASK);
 
-    g_object_set_data (G_OBJECT (menuitem), "indicator-custom-box-data", box);
-    g_object_set_data (G_OBJECT (menuitem), "indicator-custom-object-data", io);
-    g_object_set_data (G_OBJECT (menuitem), "indicator-custom-entry-data", entry);
-    g_object_set_data (G_OBJECT (menuitem), "indicator-custom-index-data", GINT_TO_POINTER (index));
+    g_object_set_data (G_OBJECT (menuitem), INDICATOR_ITEM_DATA_BOX, box);
+    g_object_set_data (G_OBJECT (menuitem), INDICATOR_ITEM_DATA_OBJECT, io);
+    g_object_set_data (G_OBJECT (menuitem), INDICATOR_ITEM_DATA_ENTRY, entry);
+    g_object_set_data (G_OBJECT (menuitem), PANEL_ITEM_DATA_INDEX, GINT_TO_POINTER (index));
 
-    g_signal_connect (G_OBJECT (menuitem), "activate", G_CALLBACK (entry_activated), NULL);
-    g_signal_connect (G_OBJECT (menuitem), "scroll-event", G_CALLBACK (entry_scrolled), NULL);
+    g_signal_connect (G_OBJECT (menuitem), "activate", G_CALLBACK (indicator_entry_activated_cb), NULL);
+    g_signal_connect (G_OBJECT (menuitem), "scroll-event", G_CALLBACK (indicator_entry_scrolled_cb), NULL);
 
     if (entry->image)
         gtk_box_pack_start (GTK_BOX(box), GTK_WIDGET(entry->image), FALSE, FALSE, 1);
@@ -236,24 +516,24 @@ create_menuitem (IndicatorObject *io, IndicatorObjectEntry *entry, GtkWidget *me
 
     gtk_container_add (GTK_CONTAINER (menuitem), box);
     gtk_widget_show (box);
-    add_indicator_to_panel (menuitem, index);
+    panel_add_item(menuitem, index, PANEL_ITEM_INDICATOR);
 
     return menuitem;
 }
 
 static void
-entry_added (IndicatorObject *io, IndicatorObjectEntry *entry, gpointer user_data)
+indicator_entry_added_cb (IndicatorObject *io, IndicatorObjectEntry *entry, gpointer user_data)
 {
     GHashTable *menuitem_lookup;
     GtkWidget  *menuitem;
 
     /* if the menuitem doesn't already exist, create it now */
-    menuitem_lookup = g_object_get_data (G_OBJECT (io), "indicator-custom-menuitems-data");
+    menuitem_lookup = g_object_get_data (G_OBJECT (io), INDICATOR_DATA_MENUITEMS);
     g_return_if_fail (menuitem_lookup);
     menuitem = g_hash_table_lookup (menuitem_lookup, entry);
     if (!GTK_IS_WIDGET (menuitem))
     {
-        menuitem = create_menuitem (io, entry, GTK_WIDGET (user_data));
+        menuitem = indicator_entry_create_menuitem (io, entry, GTK_WIDGET (user_data));
         g_hash_table_insert (menuitem_lookup, entry, menuitem);
     }
 
@@ -261,22 +541,22 @@ entry_added (IndicatorObject *io, IndicatorObjectEntry *entry, gpointer user_dat
 }
 
 static void
-entry_removed_cb (GtkWidget *widget, gpointer userdata)
+remove_indicator_entry_cb (GtkWidget *widget, gpointer userdata)
 {
     IndicatorObject *io;
     GHashTable      *menuitem_lookup;
     GtkWidget       *menuitem;
     gpointer         entry;
 
-    io = g_object_get_data (G_OBJECT (widget), "indicator-custom-object-data");
+    io = g_object_get_data (G_OBJECT (widget), INDICATOR_ITEM_DATA_OBJECT);
     if (!INDICATOR_IS_OBJECT (io))
         return;
 
-    entry = g_object_get_data (G_OBJECT (widget), "indicator-custom-entry-data");
+    entry = g_object_get_data (G_OBJECT (widget), INDICATOR_ITEM_DATA_ENTRY);
     if (entry != userdata)
         return;
 
-    menuitem_lookup = g_object_get_data (G_OBJECT (io), "indicator-custom-menuitems-data");
+    menuitem_lookup = g_object_get_data (G_OBJECT (io), INDICATOR_DATA_MENUITEMS);
     g_return_if_fail (menuitem_lookup);
     menuitem = g_hash_table_lookup (menuitem_lookup, entry);
     if (GTK_IS_WIDGET (menuitem))
@@ -286,13 +566,13 @@ entry_removed_cb (GtkWidget *widget, gpointer userdata)
 }
 
 static void
-entry_removed (IndicatorObject *io, IndicatorObjectEntry *entry, gpointer user_data)
+indicator_entry_removed_cb (IndicatorObject *io, IndicatorObjectEntry *entry, gpointer user_data)
 {
-    gtk_container_foreach (GTK_CONTAINER (user_data), entry_removed_cb, entry);
+    gtk_container_foreach (GTK_CONTAINER (user_data), remove_indicator_entry_cb, entry);
 }
 
 static void
-menu_show (IndicatorObject *io, IndicatorObjectEntry *entry, guint32 timestamp, gpointer user_data)
+indicator_menu_show_cb (IndicatorObject *io, IndicatorObjectEntry *entry, guint32 timestamp, gpointer user_data)
 {
     IndicatorObjectEntry *entrydata;
     GtkWidget            *menuitem;
@@ -363,8 +643,9 @@ reassign_menu_item_accel (GtkWidget *item)
         g_closure_unref (closure);
     }
 
-    gtk_container_foreach (GTK_CONTAINER (gtk_menu_item_get_submenu (GTK_MENU_ITEM (item))),
-                           (GtkCallback)reassign_menu_item_accel, NULL);
+    GtkWidget* submenu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (item));
+    if (submenu)
+        gtk_container_foreach (GTK_CONTAINER (submenu), (GtkCallback)reassign_menu_item_accel, NULL);
 }
 
 static void
@@ -380,8 +661,13 @@ init_indicators (GKeyFile* config)
     GHashTable *builtin_items = NULL;
     GHashTableIter iter;
     gpointer iter_value;
+    #ifdef HAVE_LIBINDICATOR
     gboolean inited = FALSE;
+    #endif
     gboolean fallback = FALSE;
+
+    const gchar *DEFAULT_LAYOUT[] = {"~host", "~spacer", "~clock", "~spacer",
+                                     "~session", "~language", "~a11y", "~power", NULL};
 
 #ifdef START_INDICATOR_SERVICES
     GError *error = NULL;
@@ -400,27 +686,59 @@ init_indicators (GKeyFile* config)
             fallback = TRUE;
     }
 
-    if (names && !fallback)
+    if (!names || fallback)
     {
-        builtin_items = g_hash_table_new (g_str_hash, g_str_equal);
-
-        g_hash_table_insert (builtin_items, "~power", power_menuitem);
-        g_hash_table_insert (builtin_items, "~session", session_menuitem);
-        g_hash_table_insert (builtin_items, "~language", language_menuitem);
-        g_hash_table_insert (builtin_items, "~a11y", a11y_menuitem);
-
-        g_hash_table_iter_init (&iter, builtin_items);
-        while (g_hash_table_iter_next (&iter, NULL, &iter_value))
-            gtk_container_remove (GTK_CONTAINER (menubar), iter_value);
+        names = (gchar**)DEFAULT_LAYOUT;
+        length = g_strv_length (names);
     }
+
+    builtin_items = g_hash_table_new (g_str_hash, g_str_equal);
+
+    g_hash_table_insert (builtin_items, "~power", power_menuitem);
+    g_hash_table_insert (builtin_items, "~session", session_menuitem);
+    g_hash_table_insert (builtin_items, "~language", language_menuitem);
+    g_hash_table_insert (builtin_items, "~a11y", a11y_menuitem);
+    g_hash_table_insert (builtin_items, "~layout", layout_menuitem);
+    g_hash_table_insert (builtin_items, "~host", host_menuitem);
+    g_hash_table_insert (builtin_items, "~clock", clock_menuitem);
+
+    g_hash_table_iter_init (&iter, builtin_items);
+    while (g_hash_table_iter_next (&iter, NULL, &iter_value))
+        gtk_container_remove (GTK_CONTAINER (menubar), iter_value);
 
     for (i = 0; i < length; ++i)
     {
-        if (names[i][0] == '~' && g_hash_table_lookup_extended (builtin_items, names[i], NULL, &iter_value))
+        if (names[i][0] == '~')
         {   /* Built-in indicators */
-            g_object_set_data (G_OBJECT (iter_value), "indicator-custom-index-data", GINT_TO_POINTER (i));
-            add_indicator_to_panel (iter_value, i);
-            g_hash_table_remove (builtin_items, (gconstpointer)names[i]);
+            GreeterPanelItemType item_type = PANEL_ITEM_INDICATOR;
+            if (g_hash_table_lookup_extended (builtin_items, names[i], NULL, &iter_value))
+                g_hash_table_remove (builtin_items, (gconstpointer)names[i]);
+            else if (g_strcmp0 (names[i], "~separator") == 0)
+            {
+                GtkWidget *separator = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+                item_type = PANEL_ITEM_SEPARATOR;
+                iter_value = gtk_separator_menu_item_new ();
+                gtk_widget_show (separator);
+                gtk_container_add (iter_value, separator);
+            }
+            else if (g_strcmp0 (names[i], "~spacer") == 0)
+            {
+                item_type = PANEL_ITEM_SPACER;
+                iter_value = gtk_separator_menu_item_new ();
+                gtk_menu_item_set_label (iter_value, "");
+                gtk_widget_set_hexpand (iter_value, TRUE);
+            }
+            else if (names[i][1] == '~')
+            {
+                item_type = PANEL_ITEM_TEXT;
+                iter_value = gtk_separator_menu_item_new ();
+                gtk_menu_item_set_label (iter_value, &names[i][2]);
+            }
+            else
+                continue;
+
+            g_object_set_data (G_OBJECT (iter_value), PANEL_ITEM_DATA_INDEX, GINT_TO_POINTER (i));
+            panel_add_item (iter_value, i, item_type);
             continue;
         }
 
@@ -473,21 +791,21 @@ init_indicators (GKeyFile* config)
             GList *entries, *lp;
 
             /* used to store/fetch menu entries */
-            g_object_set_data_full (G_OBJECT (io), "indicator-custom-menuitems-data",
+            g_object_set_data_full (G_OBJECT (io), INDICATOR_DATA_MENUITEMS,
                                     g_hash_table_new (g_direct_hash, g_direct_equal),
                                     (GDestroyNotify) g_hash_table_destroy);
-            g_object_set_data (G_OBJECT (io), "indicator-custom-index-data", GINT_TO_POINTER (i));
+            g_object_set_data (G_OBJECT (io), PANEL_ITEM_DATA_INDEX, GINT_TO_POINTER (i));
 
             g_signal_connect (G_OBJECT (io), INDICATOR_OBJECT_SIGNAL_ENTRY_ADDED,
-                              G_CALLBACK (entry_added), menubar);
+                              G_CALLBACK (indicator_entry_added_cb), menubar);
             g_signal_connect (G_OBJECT (io), INDICATOR_OBJECT_SIGNAL_ENTRY_REMOVED,
-                              G_CALLBACK (entry_removed), menubar);
+                              G_CALLBACK (indicator_entry_removed_cb), menubar);
             g_signal_connect (G_OBJECT (io), INDICATOR_OBJECT_SIGNAL_MENU_SHOW,
-                              G_CALLBACK (menu_show), menubar);
+                              G_CALLBACK (indicator_menu_show_cb), menubar);
 
             entries = indicator_object_get_entries (io);
             for (lp = entries; lp; lp = g_list_next (lp))
-                entry_added (io, lp->data, menubar);
+                indicator_entry_added_cb (io, lp->data, menubar);
             g_list_free (entries);
         }
         else
@@ -498,7 +816,7 @@ init_indicators (GKeyFile* config)
         g_free (path);
         #endif
     }
-    if (names)
+    if (names && names != (gchar**)DEFAULT_LAYOUT)
         g_strfreev (names);
 
     if (builtin_items)
@@ -566,9 +884,8 @@ set_session (const gchar *session)
         if (session)
         {
             for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
-                if (g_strcmp0 (session, g_object_get_data (G_OBJECT (menu_iter->data), "session-key")) == 0)
+                if (g_strcmp0 (session, g_object_get_data (G_OBJECT (menu_iter->data), SESSION_DATA_KEY)) == 0)
                 {
-#if GTK_CHECK_VERSION (3, 0, 0)
                     /* Set menuitem-image to session-badge */
                     GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
                     gchar* session_name = g_ascii_strdown (session, -1);
@@ -579,13 +896,14 @@ set_session (const gchar *session)
                     else
                         gtk_image_set_from_icon_name (GTK_IMAGE(session_badge), "document-properties-symbolic", GTK_ICON_SIZE_MENU);
                     g_free (icon_name);
-#endif
                     break;
                 }
         }
         if (!menu_iter)
             menu_iter = menu_items;
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
+
+        if (menu_iter)
+	        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_iter->data), TRUE);
     }
 
     g_free (current_session);
@@ -606,9 +924,7 @@ get_language (void)
     for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
     {
         if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_iter->data)))
-        {
-            return g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), "language-code"));
-        }
+            return g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), LANGUAGE_DATA_CODE));
     }
 
     return NULL;
@@ -635,7 +951,7 @@ set_language (const gchar *language)
         {
             gchar *s;
             gboolean matched;
-            s = g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), "language-code"));
+            s = g_strdup (g_object_get_data (G_OBJECT (menu_iter->data), LANGUAGE_DATA_CODE));
             matched = g_strcmp0 (s, language) == 0;
             g_free (s);
             if (matched)
@@ -650,27 +966,36 @@ set_language (const gchar *language)
     }
 
     /* If failed to find this language, then try the default */
-    if (lightdm_get_language ()) {
+    if (lightdm_get_language ())
+    {
         default_language = lightdm_language_get_code (lightdm_get_language ());
         gtk_menu_item_set_label(GTK_MENU_ITEM (language_menuitem), default_language);
     }
     if (default_language && g_strcmp0 (default_language, language) != 0)
         set_language (default_language);
     /* If all else fails, just use the first language from the menu */
-    else {
+    else
+    {
         for (menu_iter = menu_items; menu_iter != NULL; menu_iter = g_list_next(menu_iter))
         {
             if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu_iter->data)))
-                gtk_menu_item_set_label(GTK_MENU_ITEM(language_menuitem), g_strdup(g_object_get_data (G_OBJECT (menu_iter->data), "language-code")));
+            {
+                gtk_menu_item_set_label (GTK_MENU_ITEM (language_menuitem), g_strdup (g_object_get_data (G_OBJECT (menu_iter->data), LANGUAGE_DATA_CODE)));
+                break;
+            }
         }
     }
 }
 
 static void
-set_message_label (const gchar *text)
+set_message_label (LightDMMessageType type, const gchar *text)
 {
-    gtk_widget_set_visible (GTK_WIDGET (info_bar), g_strcmp0 (text, "") != 0);
+    if (type == LIGHTDM_MESSAGE_TYPE_INFO)
+        gtk_info_bar_set_message_type (info_bar, GTK_MESSAGE_INFO);
+    else
+        gtk_info_bar_set_message_type (info_bar, GTK_MESSAGE_ERROR);
     gtk_label_set_text (message_label, text);
+    gtk_widget_set_visible (GTK_WIDGET (info_bar), text && text[0]);
 }
 
 static void
@@ -693,45 +1018,33 @@ set_login_button_label (LightDMGreeter *greeter, const gchar *username)
     gtk_widget_set_sensitive (GTK_WIDGET (language_menuitem), !logged_in);
 }
 
-static void set_background (GdkPixbuf *new_bg);
-
 static void
 set_user_background (const gchar *username)
 {
-    LightDMUser *user;
-    const gchar *path;
-    GdkPixbuf *bg = NULL;
-    GError *error = NULL;
-
-    user = lightdm_user_list_get_user_by_name (lightdm_user_list_get_instance (), username);
-    if (user)
+    const gchar *path = NULL;
+    if (username)
     {
-        path = lightdm_user_get_background (user);
-        if (path)
-        {
-            bg = gdk_pixbuf_new_from_file (path, &error);
-            if (!bg)
-            {
-                g_warning ("Failed to load user background: %s", error->message);
-                g_clear_error (&error);
-            }
-        }
+        LightDMUser *user = lightdm_user_list_get_user_by_name (lightdm_user_list_get_instance (), username);
+        if (user)
+            path = lightdm_user_get_background (user);
     }
-
-    set_background (bg);
-    if (bg)
-        g_object_unref (bg);
+    greeter_background_set_custom_background (greeter_background, path);
 }
 
 static void
 set_user_image (const gchar *username)
 {
     const gchar *path;
-    LightDMUser *user;
+    LightDMUser *user = NULL;
     GdkPixbuf *image = NULL;
     GError *error = NULL;
 
-    user = lightdm_user_list_get_user_by_name (lightdm_user_list_get_instance (), username);
+    if(!gtk_widget_get_visible (GTK_WIDGET (user_image)))
+        return;
+
+    if (username)
+        user = lightdm_user_list_get_user_by_name (lightdm_user_list_get_instance (), username);
+
     if (user)
     {
         path = lightdm_user_get_image (user);
@@ -778,147 +1091,41 @@ get_absolute_position (const DimensionPosition *p, gint screen, gint window)
 }
 
 static void
-center_window (GtkWindow *window, GtkAllocation *unused, const WindowPosition *pos)
+center_window (GtkWindow *window, GtkAllocation *allocation, const WindowPosition *pos)
 {   
-    GdkScreen *screen = gtk_window_get_screen (window);
-    GtkAllocation allocation;
-    GdkRectangle monitor_geometry;
-
-    gdk_screen_get_monitor_geometry (screen, gdk_screen_get_primary_monitor (screen), &monitor_geometry);
-    gtk_widget_get_allocation (GTK_WIDGET (window), &allocation);
-    gtk_window_move (window,
-                     monitor_geometry.x + get_absolute_position (&pos->x, monitor_geometry.width, allocation.width),
-                     monitor_geometry.y + get_absolute_position (&pos->y, monitor_geometry.height, allocation.height));
-}
-
-#if GTK_CHECK_VERSION (3, 0, 0)
-/* Use the much simpler fake transparency by drawing the window background with Cairo for Gtk3 */
-static gboolean
-background_window_draw (GtkWidget *widget, cairo_t *cr, gpointer user_data)
-{
-    if (background_pixbuf)
-        gdk_cairo_set_source_pixbuf (cr, background_pixbuf, 0, 0);
-    else
-        gdk_cairo_set_source_rgba (cr, default_background_color);
-    cairo_paint (cr);
-    return FALSE;
-}
-
-static gboolean
-login_window_draw (GtkWidget *widget, cairo_t *cr, gpointer user_data)
-{
-    GdkScreen *screen = gtk_window_get_screen (GTK_WINDOW(widget));
-    GtkAllocation *allocation = g_new0 (GtkAllocation, 1);
-    GdkRectangle monitor_geometry;
-    gint x,y;
-
-    if (background_pixbuf)
+    const GdkRectangle *monitor_geometry = greeter_background_get_active_monitor_geometry (greeter_background);
+    GtkAllocation *new_allocation = NULL;
+    if (!allocation)
     {
-        gdk_screen_get_monitor_geometry (screen, gdk_screen_get_primary_monitor (screen), &monitor_geometry);
-        gtk_widget_get_allocation (widget, allocation);
-        x = get_absolute_position (&main_window_pos.x, monitor_geometry.width, allocation->width);
-        y = get_absolute_position (&main_window_pos.y, monitor_geometry.height, allocation->height);
-        gdk_cairo_set_source_pixbuf (cr, background_pixbuf, monitor_geometry.x - x, monitor_geometry.y - y);
+        allocation = new_allocation = g_new0 (GtkAllocation, 1);
+        gtk_widget_get_allocation (GTK_WIDGET (window), new_allocation);
     }
-    else
-        gdk_cairo_set_source_rgba (cr, default_background_color);
-
-    cairo_paint (cr);
-
-    g_free (allocation);
-    return FALSE;
+    if (monitor_geometry)
+        gtk_window_move (window,
+                         monitor_geometry->x + get_absolute_position (&pos->x, monitor_geometry->width, allocation->width),
+                         monitor_geometry->y + get_absolute_position (&pos->y, monitor_geometry->height, allocation->height));
+    g_free (new_allocation);
 }
 
-#else
-static GdkRegion *
-cairo_region_from_rectangle (gint width, gint height, gint radius)
+static void
+active_monitor_changed_cb (GreeterBackground *background, gpointer user_data)
 {
-    GdkRegion *region;
-
-    gint x = radius, y = 0;
-    gint xChange = 1 - (radius << 1);
-    gint yChange = 0;
-    gint radiusError = 0;
-
-    GdkRectangle rect;
-
-    rect.x = radius;
-    rect.y = radius;
-    rect.width = width - radius * 2;
-    rect.height = height - radius * 2;
-
-    region = gdk_region_rectangle (&rect);
-
-    while(x >= y)
+    const GdkRectangle *monitor_geometry = greeter_background_get_active_monitor_geometry (greeter_background);
+    if (monitor_geometry)
     {
-
-        rect.x = -x + radius;
-        rect.y = -y + radius;
-        rect.width = x - radius + width - rect.x;
-        rect.height =  y - radius + height - rect.y;
-
-        gdk_region_union_with_rect(region, &rect);
-
-        rect.x = -y + radius;
-        rect.y = -x + radius;
-        rect.width = y - radius + width - rect.x;
-        rect.height =  x - radius + height - rect.y;
-
-        gdk_region_union_with_rect(region, &rect);
-
-        y++;
-        radiusError += yChange;
-        yChange += 2;
-        if(((radiusError << 1) + xChange) > 0)
-        {
-            x--;
-            radiusError += xChange;
-            xChange += 2;
-        }
-   }
-
-   return region;
-}
-
-static gboolean
-login_window_size_allocate (GtkWidget *widget, GdkRectangle *allocation, gpointer user_data)
-{
-    gint    radius = 10;
-
-    GdkWindow *window = gtk_widget_get_window (widget);
-    if (window_region)
-        gdk_region_destroy(window_region);
-    window_region = cairo_region_from_rectangle (allocation->width, allocation->height, radius);
-    if (window) {
-        gdk_window_shape_combine_region(window, window_region, 0, 0);
-        gdk_window_input_shape_combine_region(window, window_region, 0, 0);
+        GdkGeometry hints;
+        hints.min_width = monitor_geometry->width;
+        hints.max_width = monitor_geometry->width;
+        hints.min_height = -1;
+        hints.max_height = -1;
+        gtk_window_set_geometry_hints (panel_window, GTK_WIDGET(panel_window),
+                                       &hints, GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE);
     }
-
-    return TRUE;
 }
-
-static gboolean
-background_window_expose (GtkWidget    *widget,
-                                       GdkEventExpose *event,
-                                       gpointer user_data)
-{
-    cairo_t *cr = gdk_cairo_create (gtk_widget_get_window (widget));
-    if (background_pixbuf)
-        gdk_cairo_set_source_pixbuf (cr, background_pixbuf, 0, 0);
-    else
-        gdk_cairo_set_source_color (cr, default_background_color);
-    cairo_paint (cr);
-    return FALSE;
-}
-#endif
 
 static void
 start_authentication (const gchar *username)
 {
-    gchar *data;
-    gsize data_length;
-    GError *error = NULL;
-
     cancelling = FALSE;
     prompted = FALSE;
     password_prompted = FALSE;
@@ -931,18 +1138,7 @@ start_authentication (const gchar *username)
     }
 
     g_key_file_set_value (state, "greeter", "last-user", username);
-    data = g_key_file_to_data (state, &data_length, &error);
-    if (error)
-        g_warning ("Failed to save state file: %s", error->message);
-    g_clear_error (&error);
-    if (data)
-    {
-        g_file_set_contents (state_filename, data, data_length, &error);
-        if (error)
-            g_warning ("Failed to save state file: %s", error->message);
-        g_clear_error (&error);
-    }
-    g_free (data);
+    save_state_file ();
 
     if (g_strcmp0 (username, "*other") == 0)
     {
@@ -995,7 +1191,7 @@ cancel_authentication (void)
     {
         cancelling = TRUE;
         lightdm_greeter_cancel_authentication (greeter);
-        set_message_label ("");
+        set_message_label (LIGHTDM_MESSAGE_TYPE_INFO, NULL);
     }
 
     /* Make sure password entry is back to normal */
@@ -1025,9 +1221,6 @@ start_session (void)
 {
     gchar *language;
     gchar *session;
-    gchar *data;
-    gsize data_length;
-    GError *error = NULL;
 
     language = get_language ();
     if (language)
@@ -1038,23 +1231,13 @@ start_session (void)
 
     /* Remember last choice */
     g_key_file_set_value (state, "greeter", "last-session", session);
+    save_state_file ();
 
-    data = g_key_file_to_data (state, &data_length, &error);
-    if (error)
-        g_warning ("Failed to save state file: %s", error->message);
-    g_clear_error (&error);
-    if (data)
-    {
-        g_file_set_contents (state_filename, data, data_length, &error);
-        if (error)
-            g_warning ("Failed to save state file: %s", error->message);
-        g_clear_error (&error);
-    }
-    g_free (data);
+    greeter_background_save_xroot (greeter_background);
 
     if (!lightdm_greeter_start_session_sync (greeter, session, NULL))
     {
-        set_message_label (_("Failed to start session"));
+        set_message_label (LIGHTDM_MESSAGE_TYPE_ERROR, _("Failed to start session"));
         start_authentication (lightdm_greeter_get_authentication_user (greeter));
     }
     g_free (session);
@@ -1067,10 +1250,7 @@ void
 session_selected_cb(GtkMenuItem *menuitem, gpointer user_data)
 {
     if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem)))
-    {
-       gchar *session = g_object_get_data (G_OBJECT (menuitem), "session-key");
-       set_session(session);
-    }
+       set_session(g_object_get_data (G_OBJECT (menuitem), SESSION_DATA_KEY));
 }
 
 void
@@ -1081,7 +1261,7 @@ language_selected_cb(GtkMenuItem *menuitem, gpointer user_data)
 {
     if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem)))
     {
-       gchar *language = g_object_get_data (G_OBJECT (menuitem), "language-code");
+       gchar *language = g_object_get_data (G_OBJECT (menuitem), LANGUAGE_DATA_CODE);
        set_language(language);
     }
 }
@@ -1120,17 +1300,7 @@ password_key_press_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data
             return FALSE;
 
         if (event->keyval == GDK_KEY_Up)
-        {
-            #if GTK_CHECK_VERSION (3, 0, 0)
             available = gtk_tree_model_iter_previous (model, &iter);
-            #else
-            GtkTreePath *path = gtk_tree_model_get_path (model, &iter);
-            available = gtk_tree_path_prev (path);
-            if (available)
-                available = gtk_tree_model_get_iter (model, &iter, path);
-            gtk_tree_path_free (path);
-            #endif
-        }
         else
             available = gtk_tree_model_iter_next (model, &iter);
 
@@ -1163,9 +1333,9 @@ username_key_press_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data
     if (event->keyval == GDK_KEY_Up)
         return password_key_press_cb (widget, event, user_data);
     /* Enter activates the password entry */
-    else if (event->keyval == GDK_KEY_Return)
+    else if (event->keyval == GDK_KEY_Return && gtk_widget_get_visible (GTK_WIDGET (password_entry)))
     {
-        gtk_widget_grab_focus(GTK_WIDGET(password_entry));
+        gtk_widget_grab_focus (GTK_WIDGET (password_entry));
         return TRUE;
     }
     else
@@ -1220,7 +1390,8 @@ login_window_key_press_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_
     return TRUE;
 }
 
-static void set_displayed_user (LightDMGreeter *greeter, gchar *username)
+static void
+set_displayed_user (LightDMGreeter *greeter, const gchar *username)
 {
     gchar *user_tooltip;
     LightDMUser *user;
@@ -1235,13 +1406,20 @@ static void set_displayed_user (LightDMGreeter *greeter, gchar *username)
     {
         gtk_widget_hide (GTK_WIDGET (username_entry));
         gtk_widget_hide (GTK_WIDGET (cancel_button));
-        gtk_widget_grab_focus (GTK_WIDGET (password_entry));
         user_tooltip = g_strdup(username);
     }
+
+    /* At this moment we do not have information about possible prompts
+     * for current user (except *guest). So, password_entry.visible changed in:
+     *   auth_complete_cb
+     *   process_prompts
+     *   and here - for *guest */
 
     if (g_strcmp0 (username, "*guest") == 0)
     {
         user_tooltip = g_strdup(_("Guest Session"));
+        gtk_widget_hide (GTK_WIDGET (password_entry));
+        gtk_widget_grab_focus (GTK_WIDGET (user_combo));
     }
 
     set_login_button_label (greeter, username);
@@ -1280,7 +1458,7 @@ user_combobox_active_changed_cb (GtkComboBox *widget, LightDMGreeter *greeter)
 
         g_free (user);
     }
-    set_message_label ("");
+    set_message_label (LIGHTDM_MESSAGE_TYPE_INFO, NULL);
 }
 
 static const gchar*
@@ -1310,6 +1488,7 @@ process_prompts (LightDMGreeter *greeter)
         prompted = TRUE;
         prompt_active = TRUE;
         gtk_widget_grab_focus (GTK_WIDGET (username_entry));
+        gtk_widget_show (GTK_WIDGET (password_entry));
         return;
     }
 
@@ -1322,10 +1501,12 @@ process_prompts (LightDMGreeter *greeter)
         {
             /* FIXME: this doesn't show multiple messages, but that was
              * already the case before. */
-            set_message_label (message->text);
+            set_message_label (message->type.message, message->text);
             continue;
         }
 
+        gtk_widget_show (GTK_WIDGET (password_entry));
+        gtk_widget_grab_focus (GTK_WIDGET (password_entry));
         gtk_entry_set_text (password_entry, "");
         gtk_entry_set_visibility (password_entry, message->type.prompt != LIGHTDM_PROMPT_TYPE_SECRET);
         if (get_message_label()[0] == 0 && password_prompted)
@@ -1342,7 +1523,7 @@ process_prompts (LightDMGreeter *greeter)
                 str = g_strndup (str, strlen (str) - 2);
             else if (g_str_has_suffix (str, ":"))
                 str = g_strndup (str, strlen (str) - 1);
-            set_message_label (str);
+            set_message_label (LIGHTDM_MESSAGE_TYPE_INFO, str);
             if (str != message->text)
                 g_free (str);
         }
@@ -1368,7 +1549,7 @@ login_cb (GtkWidget *widget)
 
     gtk_widget_set_sensitive (GTK_WIDGET (username_entry), FALSE);
     gtk_widget_set_sensitive (GTK_WIDGET (password_entry), FALSE);
-    set_message_label ("");
+    set_message_label (LIGHTDM_MESSAGE_TYPE_INFO, NULL);
     prompt_active = FALSE;
 
     if (lightdm_greeter_get_is_authenticated (greeter))
@@ -1392,6 +1573,25 @@ void
 cancel_cb (GtkWidget *widget)
 {
     cancel_authentication ();
+}
+
+gboolean
+user_combo_key_press_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data);
+G_MODULE_EXPORT
+gboolean
+user_combo_key_press_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    if (event->keyval == GDK_KEY_Return)
+    {
+        if (gtk_widget_get_visible (GTK_WIDGET (username_entry)))
+            gtk_widget_grab_focus (GTK_WIDGET (username_entry));
+        else if (gtk_widget_get_visible (GTK_WIDGET (password_entry)))
+            gtk_widget_grab_focus (GTK_WIDGET (password_entry));
+        else
+            login_cb (GTK_WIDGET (login_button));
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static void
@@ -1448,17 +1648,31 @@ authentication_complete_cb (LightDMGreeter *greeter)
     {
         if (prompted)
             start_session ();
+        else
+        {
+            gtk_widget_hide (GTK_WIDGET (password_entry));
+            gtk_widget_grab_focus (GTK_WIDGET (user_combo));
+        }
     }
     else
     {
+        /* If an error message is already printed we do not print it this statement
+         * The error message probably comes from the PAM module that has a better knowledge
+         * of the failure. */
+        gboolean have_pam_error = get_message_label()[0] &&
+                                  gtk_info_bar_get_message_type (info_bar) != GTK_MESSAGE_ERROR;
         if (prompted)
         {
-            if (get_message_label()[0] == 0)
-                set_message_label (_("Incorrect password, please try again"));
+            if (!have_pam_error)
+                set_message_label (LIGHTDM_MESSAGE_TYPE_ERROR, _("Incorrect password, please try again"));
             start_authentication (lightdm_greeter_get_authentication_user (greeter));
         }
         else
-            set_message_label (_("Failed to authenticate"));
+        {
+            g_warning ("Failed to authenticate");
+            if (!have_pam_error)
+                set_message_label (LIGHTDM_MESSAGE_TYPE_ERROR, _("Failed to authenticate"));
+        }
     }
 }
 
@@ -1514,7 +1728,7 @@ show_power_prompt (const gchar* action, const gchar* message, const gchar* icon,
                                      GTK_MESSAGE_OTHER,
                                      GTK_BUTTONS_NONE,
                                      "%s", action);
-    gtk_message_dialog_format_secondary_markup(GTK_MESSAGE_DIALOG(dialog), "%s", message);        
+    gtk_message_dialog_format_secondary_markup (GTK_MESSAGE_DIALOG (dialog), "%s", message);        
     button = gtk_dialog_add_button(GTK_DIALOG (dialog), _("Cancel"), GTK_RESPONSE_CANCEL);
     gtk_widget_set_name(button, "cancel_button");
     button = gtk_dialog_add_button(GTK_DIALOG (dialog), action, GTK_RESPONSE_OK);
@@ -1525,26 +1739,23 @@ show_power_prompt (const gchar* action, const gchar* message, const gchar* icon,
     gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(dialog), image);
 
     /* Make the dialog themeable and attractive */
-#if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(dialog))), "lightdm-gtk-greeter");
-#endif
-    gtk_widget_set_name(dialog, dialog_name);
-#if GTK_CHECK_VERSION (3, 0, 0)
-    g_signal_connect (G_OBJECT (dialog), "draw", G_CALLBACK (login_window_draw), NULL);
-#else
-    g_signal_connect (G_OBJECT (dialog), "size-allocate", G_CALLBACK (login_window_size_allocate), NULL);
-#endif
-    gtk_container_set_border_width(GTK_CONTAINER (dialog), 18);
+    gtk_style_context_add_class (GTK_STYLE_CONTEXT (gtk_widget_get_style_context (GTK_WIDGET (dialog))), "lightdm-gtk-greeter");
+    gtk_widget_set_name (dialog, dialog_name);
+    gtk_container_set_border_width (GTK_CONTAINER (dialog), 18);
+
+    greeter_background_add_subwindow (greeter_background, GTK_WINDOW (dialog));
 
     /* Hide the login window and show the dialog */
     gtk_widget_hide (GTK_WIDGET (login_window));
     gtk_widget_show_all (dialog);
-    center_window (GTK_WINDOW (dialog), NULL, &CENTERED_WINDOW_POS);
+    center_window (GTK_WINDOW (dialog), NULL, &WINDOW_POS_CENTER);
 
     result = gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_OK;
 
+    greeter_background_remove_subwindow(greeter_background, GTK_WINDOW (dialog));
     gtk_widget_destroy (dialog);
     gtk_widget_show (GTK_WIDGET (login_window));
+    gtk_widget_queue_resize(GTK_WIDGET (login_window));
 
     return result;
 }
@@ -1555,12 +1766,7 @@ void
 restart_cb (GtkWidget *widget, LightDMGreeter *greeter)
 {
     if (show_power_prompt(_("Restart"), _("Are you sure you want to close all programs and restart the computer?"),
-                          #if GTK_CHECK_VERSION (3, 0, 0)
-                          "view-refresh-symbolic",
-                          #else
-                          "view-refresh",
-                          #endif
-                          "restart_dialog", "restart_button"))
+                          "view-refresh-symbolic", "restart_dialog", "restart_button"))
         lightdm_restart (NULL);
 }
 
@@ -1570,12 +1776,7 @@ void
 shutdown_cb (GtkWidget *widget, LightDMGreeter *greeter)
 {
     if (show_power_prompt(_("Shut Down"), _("Are you sure you want to close all programs and shut down the computer?"),
-                          #if GTK_CHECK_VERSION (3, 0, 0)
-                          "system-shutdown-symbolic",
-                          #else
-                          "system-shutdown",
-                          #endif
-                          "shutdown_dialog", "shutdown_button"))
+                          "system-shutdown-symbolic", "shutdown_dialog", "shutdown_button"))
         lightdm_shutdown (NULL);
 }
 
@@ -1665,9 +1866,6 @@ a11y_font_cb (GtkCheckMenuItem *item)
         gchar *font_name, **tokens;
         guint length;
 
-        /* Hide the clock since indicators are about to eat the screen. */
-        gtk_widget_hide(GTK_WIDGET(clock_label));
-
         g_object_get (gtk_settings_get_default (), "gtk-font-name", &font_name, NULL);
         tokens = g_strsplit (font_name, " ", -1);
         length = g_strv_length (tokens);
@@ -1689,8 +1887,6 @@ a11y_font_cb (GtkCheckMenuItem *item)
     else
     {
         g_object_set (gtk_settings_get_default (), "gtk-font-name", default_font_name, NULL);
-        /* Show the clock as needed */
-        gtk_widget_show_all(GTK_WIDGET(clock_label));
     }
 }
 
@@ -1711,82 +1907,26 @@ a11y_contrast_cb (GtkCheckMenuItem *item)
     }
 }
 
-static void
-keyboard_terminated_cb (GPid pid, gint status, gpointer user_data)
-{
-    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (keyboard_menuitem), FALSE);
-}
-
-void a11y_keyboard_cb (GtkCheckMenuItem *item);
+void a11y_keyboard_cb (GtkCheckMenuItem *item, gpointer user_data);
 G_MODULE_EXPORT
 void
-a11y_keyboard_cb (GtkCheckMenuItem *item)
+a11y_keyboard_cb (GtkCheckMenuItem *item, gpointer user_data)
 {
     if (gtk_check_menu_item_get_active (item))
-    {
-        gboolean spawned = FALSE;
-        if (onboard_window)
-        {
-            GtkSocket* socket = NULL;
-            gint out_fd = 0;
-
-            if (g_spawn_async_with_pipes (NULL, a11y_keyboard_command, NULL, G_SPAWN_SEARCH_PATH,
-                                          NULL, NULL, &a11y_kbd_pid, NULL, &out_fd, NULL,
-                                          &a11y_keyboard_error))
-            {
-                gchar* text = NULL;
-                GIOChannel* out_channel = g_io_channel_unix_new (out_fd);
-                if (g_io_channel_read_line(out_channel, &text, NULL, NULL, &a11y_keyboard_error) == G_IO_STATUS_NORMAL)
-                {
-                    gchar* end_ptr = NULL;
-
-                    text = g_strstrip (text);
-                    gint id = g_ascii_strtoll (text, &end_ptr, 0);
-
-                    if (id != 0 && end_ptr > text)
-                    {
-                        socket = GTK_SOCKET (gtk_socket_new ());
-                        gtk_container_add (GTK_CONTAINER (onboard_window), GTK_WIDGET (socket));
-                        gtk_socket_add_id (socket, id);
-                        gtk_widget_show_all (GTK_WIDGET (onboard_window));
-                        spawned = TRUE;
-                    }
-                    else
-                        g_debug ("onboard keyboard command error : 'unrecognized output'");
-
-                    g_free(text);
-                }
-            }
-        }
-        else
-        {
-            spawned = g_spawn_async (NULL, a11y_keyboard_command, NULL,
-                                     G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
-                                     NULL, NULL, &a11y_kbd_pid, &a11y_keyboard_error);
-            if (spawned)
-                g_child_watch_add (a11y_kbd_pid, keyboard_terminated_cb, NULL);
-        }
-
-        if(!spawned)
-        {
-            if (a11y_keyboard_error)
-                g_debug ("a11y keyboard command error : '%s'", a11y_keyboard_error->message);
-            a11y_kbd_pid = 0;
-            g_clear_error(&a11y_keyboard_error);
-            gtk_check_menu_item_set_active (item, FALSE);
-        }
-    }
+        menu_command_run (a11y_keyboard_command);
     else
-    {
-        if (a11y_kbd_pid != 0)
-        {
-            kill (a11y_kbd_pid, SIGTERM);
-            g_spawn_close_pid (a11y_kbd_pid);
-            a11y_kbd_pid = 0;
-            if (onboard_window)
-                gtk_widget_hide (GTK_WIDGET(onboard_window));
-        }
-    }
+        menu_command_stop (a11y_keyboard_command);
+}
+
+void a11y_reader_cb (GtkCheckMenuItem *item, gpointer user_data);
+G_MODULE_EXPORT
+void
+a11y_reader_cb (GtkCheckMenuItem *item, gpointer user_data)
+{
+    if (gtk_check_menu_item_get_active (item))
+        menu_command_run (a11y_reader_command);
+    else
+        menu_command_stop (a11y_reader_command);
 }
 
 static void
@@ -1859,9 +1999,7 @@ load_user_list (void)
                 if (matched)
                 {
                     gtk_combo_box_set_active_iter (user_combo, &iter);
-                    name = g_strdup(selected_user);
-                    set_displayed_user(greeter, name);
-                    g_free(name);
+                    set_displayed_user (greeter, selected_user);
                     break;
                 }
             } while (gtk_tree_model_iter_next (model, &iter));
@@ -1880,253 +2018,6 @@ load_user_list (void)
     g_free (last_user);
 }
 
-/* The following code for setting a RetainPermanent background pixmap was taken
-   originally from Gnome, with some fixes from MATE. see:
-   https://github.com/mate-desktop/mate-desktop/blob/master/libmate-desktop/mate-bg.c */
-static cairo_surface_t *
-create_root_surface (GdkScreen *screen)
-{
-    gint number, width, height;
-    Display *display;
-    Pixmap pixmap;
-    cairo_surface_t *surface;
-
-    number = gdk_screen_get_number (screen);
-    width = gdk_screen_get_width (screen);
-    height = gdk_screen_get_height (screen);
-
-    /* Open a new connection so with Retain Permanent so the pixmap remains when the greeter quits */
-    gdk_flush ();
-    display = XOpenDisplay (gdk_display_get_name (gdk_screen_get_display (screen)));
-    if (!display)
-    {
-        g_warning ("Failed to create root pixmap");
-        return NULL;
-    }
-
-    XSetCloseDownMode (display, RetainPermanent);
-    pixmap = XCreatePixmap (display, RootWindow (display, number), width, height, DefaultDepth (display, number));
-    XCloseDisplay (display);
-
-    /* Convert into a Cairo surface */
-    surface = cairo_xlib_surface_create (GDK_SCREEN_XDISPLAY (screen),
-                                         pixmap,
-                                         GDK_VISUAL_XVISUAL (gdk_screen_get_system_visual (screen)),
-                                         width, height);
-
-    return surface;
-}
-
-/* Sets the "ESETROOT_PMAP_ID" property to later be used to free the pixmap,
-*/
-static void
-set_root_pixmap_id (GdkScreen *screen,
-                         Display *display,
-                         Pixmap xpixmap)
-{
-    Window xroot = RootWindow (display, gdk_screen_get_number (screen));
-    char *atom_names[] = {"_XROOTPMAP_ID", "ESETROOT_PMAP_ID"};
-    Atom atoms[G_N_ELEMENTS(atom_names)] = {0};
-
-    Atom type;
-    int format;
-    unsigned long nitems, after;
-    unsigned char *data_root, *data_esetroot;
-
-    /* Get atoms for both properties in an array, only if they exist.
-     * This method is to avoid multiple round-trips to Xserver
-     */
-    if (XInternAtoms (display, atom_names, G_N_ELEMENTS(atom_names), True, atoms) &&
-        atoms[0] != None && atoms[1] != None)
-    {
-
-        XGetWindowProperty (display, xroot, atoms[0], 0L, 1L, False, AnyPropertyType,
-                            &type, &format, &nitems, &after, &data_root);
-        if (data_root && type == XA_PIXMAP && format == 32 && nitems == 1)
-        {
-            XGetWindowProperty (display, xroot, atoms[1], 0L, 1L, False, AnyPropertyType,
-                                &type, &format, &nitems, &after, &data_esetroot);
-            if (data_esetroot && type == XA_PIXMAP && format == 32 && nitems == 1)
-            {
-                Pixmap xrootpmap = *((Pixmap *) data_root);
-                Pixmap esetrootpmap = *((Pixmap *) data_esetroot);
-                XFree (data_root);
-                XFree (data_esetroot);
-
-                gdk_error_trap_push ();
-                if (xrootpmap && xrootpmap == esetrootpmap) {
-                    XKillClient (display, xrootpmap);
-                }
-                if (esetrootpmap && esetrootpmap != xrootpmap) {
-                    XKillClient (display, esetrootpmap);
-                }
-
-                XSync (display, False);
-#if GTK_CHECK_VERSION (3, 0, 0)
-                gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
-
-            }
-        }
-    }
-
-    /* Get atoms for both properties in an array, create them if needed.
-     * This method is to avoid multiple round-trips to Xserver
-     */
-    if (!XInternAtoms (display, atom_names, G_N_ELEMENTS(atom_names), False, atoms) ||
-        atoms[0] == None || atoms[1] == None) {
-        g_warning("Could not create atoms needed to set root pixmap id/properties.\n");
-        return;
-    }
-
-    /* Set new _XROOTMAP_ID and ESETROOT_PMAP_ID properties */
-    XChangeProperty (display, xroot, atoms[0], XA_PIXMAP, 32,
-                     PropModeReplace, (unsigned char *) &xpixmap, 1);
-
-    XChangeProperty (display, xroot, atoms[1], XA_PIXMAP, 32,
-                     PropModeReplace, (unsigned char *) &xpixmap, 1);
-}
-
-/**
-* set_surface_as_root:
-* @screen: the #GdkScreen to change root background on
-* @surface: the #cairo_surface_t to set root background from.
-* Must be an xlib surface backing a pixmap.
-*
-* Set the root pixmap, and properties pointing to it. We
-* do this atomically with a server grab to make sure that
-* we won't leak the pixmap if somebody else it setting
-* it at the same time. (This assumes that they follow the
-* same conventions we do). @surface should come from a call
-* to create_root_surface().
-**/
-static void
-set_surface_as_root (GdkScreen *screen, cairo_surface_t *surface)
-{
-    g_return_if_fail (cairo_surface_get_type (surface) == CAIRO_SURFACE_TYPE_XLIB);
-
-    /* Desktop background pixmap should be created from dummy X client since most
-     * applications will try to kill it with XKillClient later when changing pixmap
-     */
-    Display *display = GDK_DISPLAY_XDISPLAY (gdk_screen_get_display (screen));
-    Pixmap pixmap_id = cairo_xlib_surface_get_drawable (surface);
-    Window xroot = RootWindow (display, gdk_screen_get_number (screen));
-
-    XGrabServer (display);
-
-    XSetWindowBackgroundPixmap (display, xroot, pixmap_id);
-    set_root_pixmap_id (screen, display, pixmap_id);
-    XClearWindow (display, xroot);
-
-    XFlush (display);
-    XUngrabServer (display);
-}
-
-static void
-set_background (GdkPixbuf *new_bg)
-{
-    GdkRectangle monitor_geometry;
-    GdkPixbuf *bg = NULL, *p = NULL;
-    GSList *iter;
-    gint i, p_height, p_width, offset_x, offset_y;
-    gdouble scale_x, scale_y, scale;
-    GdkInterpType interp_type;
-    gint num_screens = 1;
-
-    if (new_bg)
-        bg = new_bg;
-    else
-        bg = default_background_pixbuf;
-
-    #if GDK_VERSION_CUR_STABLE < G_ENCODE_VERSION(3, 10)
-        num_screens = gdk_display_get_n_screens (gdk_display_get_default ());
-    #endif
-
-    /* Set the background */
-    for (i = 0; i < num_screens; i++)
-    {
-        GdkScreen *screen;
-        cairo_surface_t *surface;
-        cairo_t *c;
-        gint monitor;
-
-        screen = gdk_display_get_screen (gdk_display_get_default (), i);
-        surface = create_root_surface (screen);
-        c = cairo_create (surface);
-
-        for (monitor = 0; monitor < gdk_screen_get_n_monitors (screen); monitor++)
-        {
-            gdk_screen_get_monitor_geometry (screen, monitor, &monitor_geometry);
-
-            if (bg)
-            {
-                p_width = gdk_pixbuf_get_width (bg);
-                p_height = gdk_pixbuf_get_height (bg);
-
-                scale_x = (gdouble)monitor_geometry.width / p_width;
-                scale_y = (gdouble)monitor_geometry.height / p_height;
-
-                if (scale_x < scale_y)
-                {
-                    scale = scale_y;
-                    offset_x = (monitor_geometry.width - (p_width * scale)) / 2;
-                    offset_y = 0;
-                }
-                else
-                {
-                    scale = scale_x;
-                    offset_x = 0;
-                    offset_y = (monitor_geometry.height - (p_height * scale)) / 2;
-                }
-
-                p = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, gdk_pixbuf_get_bits_per_sample (bg),
-                                    monitor_geometry.width, monitor_geometry.height);
-
-                /* Set interpolation type */
-                if (monitor_geometry.width == p_width && monitor_geometry.height == p_height)
-                    interp_type = GDK_INTERP_NEAREST;
-                else
-                    interp_type = GDK_INTERP_BILINEAR;
-
-                /* Zoom the background pixbuf to fit the screen */
-                gdk_pixbuf_composite (bg, p, 0, 0, monitor_geometry.width, monitor_geometry.height,
-                                      offset_x, offset_y, scale, scale, interp_type, 255);
-
-                gdk_cairo_set_source_pixbuf (c, p, monitor_geometry.x, monitor_geometry.y);
-
-                /* Make the background pixbuf globally accessible so it can be reused for fake transparency */
-                if (background_pixbuf)
-                    g_object_unref (background_pixbuf);
-
-                background_pixbuf = p;
-            }
-            else
-            {
-#if GTK_CHECK_VERSION (3, 0, 0)
-                gdk_cairo_set_source_rgba (c, default_background_color);
-#else
-                gdk_cairo_set_source_color (c, default_background_color);
-#endif
-                background_pixbuf = NULL;
-            }
-            cairo_paint (c);
-            iter = g_slist_nth (backgrounds, monitor);
-            gtk_widget_queue_draw (GTK_WIDGET (iter->data));
-        }
-
-        cairo_destroy (c);
-
-        /* Refresh background */
-        gdk_flush ();
-        set_surface_as_root (screen, surface);
-        cairo_surface_destroy (surface);
-    }
-    gtk_widget_queue_draw (GTK_WIDGET (login_window));
-    gtk_widget_queue_draw (GTK_WIDGET (panel_window));
-}
-
 static gboolean
 clock_timeout_thread (void)
 {
@@ -2140,8 +2031,8 @@ clock_timeout_thread (void)
     
     strftime(time_str, 50, clock_format, timeinfo);
     markup = g_markup_printf_escaped("<b>%s</b>", time_str);
-    if (g_strcmp0(markup, gtk_label_get_label(GTK_LABEL(clock_label))) != 0)
-        gtk_label_set_markup( GTK_LABEL(clock_label), markup );
+    if (g_strcmp0(markup, gtk_label_get_label (GTK_LABEL (clock_label))) != 0)
+        gtk_label_set_markup (GTK_LABEL (clock_label), markup);
     g_free(markup);
     
     return TRUE;
@@ -2180,7 +2071,8 @@ static GdkFilterReturn
 focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
 {
     XEvent* xevent = (XEvent*)gxevent;
-    GdkWindow* keyboard_win = onboard_window ? gtk_widget_get_window (GTK_WIDGET (onboard_window)) : NULL;
+    GdkWindow* keyboard_win = a11y_keyboard_command && a11y_keyboard_command->widget ?
+                                    gtk_widget_get_window (GTK_WIDGET (a11y_keyboard_command->widget)) : NULL;
     if (xevent->type == MapNotify)
     {
         Window xwin = xevent->xmap.window;
@@ -2191,11 +2083,7 @@ focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
 
         /* Check to see if this window is our onboard window, since we don't want to focus it. */
         if (keyboard_win)
-#if GTK_CHECK_VERSION (3, 0, 0)
-                keyboard_xid = gdk_x11_window_get_xid (keyboard_win);
-#else
-                keyboard_xid = gdk_x11_drawable_get_xid (keyboard_win);
-#endif
+            keyboard_xid = gdk_x11_window_get_xid (keyboard_win);
 
         if (xwin != keyboard_xid
             && win_type != GDK_WINDOW_TYPE_HINT_TOOLTIP
@@ -2203,11 +2091,8 @@ focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
         {
             gdk_window_focus (win, GDK_CURRENT_TIME);
             /* Make sure to keep keyboard above */
-            if (onboard_window)
-            {
-                if (keyboard_win)
-                    gdk_window_raise (keyboard_win);
-            }
+            if (keyboard_win)
+                gdk_window_raise (keyboard_win);
         }
     }
     else if (xevent->type == UnmapNotify)
@@ -2220,42 +2105,199 @@ focus_upon_map (GdkXEvent *gxevent, GdkEvent *event, gpointer  data)
         {
             gdk_window_focus (gtk_widget_get_window (GTK_WIDGET (login_window)), GDK_CURRENT_TIME);
             /* Make sure to keep keyboard above */
-            if (onboard_window)
-            {
-                if (keyboard_win)
-                    gdk_window_raise (keyboard_win);
-            }
+            if (keyboard_win)
+                gdk_window_raise (keyboard_win);
         }
     }
     return GDK_FILTER_CONTINUE;
 }
 
+/* Layout functions and callbacks */
+
+static void
+layout_selected_cb(GtkCheckMenuItem *menuitem, gpointer user_data)
+{
+    if (gtk_check_menu_item_get_active (menuitem))
+    {
+        #ifdef HAVE_LIBXKLAVIER
+        gint group = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (menuitem), LAYOUT_DATA_GROUP));
+        xkl_engine_lock_group (xkl_engine, group);
+        #else
+        const gchar *name = g_object_get_data (G_OBJECT (menuitem), LAYOUT_DATA_NAME);
+        GList *item;
+        for (item = lightdm_get_layouts (); item; item = g_list_next (item))
+        {
+            if (g_strcmp0 (name, lightdm_layout_get_name (item->data)) == 0)
+            {
+                lightdm_set_layout (item->data);
+                gtk_menu_item_set_label (GTK_MENU_ITEM (layout_menuitem),
+                                         g_object_get_data (G_OBJECT (menuitem), LAYOUT_DATA_LABEL));
+                break;
+            }
+        }
+        #endif
+    }
+}
+
+static void
+update_layouts_menu (void)
+{
+    #ifdef HAVE_LIBXKLAVIER
+    XklConfigRegistry *registry;
+    XklConfigRec *config;
+    XklConfigItem *config_item;
+    GSList *menu_group = NULL;
+    gint i;
+
+    g_list_free_full (gtk_container_get_children (GTK_CONTAINER (layout_menu)),
+                      (GDestroyNotify)gtk_widget_destroy);
+
+    config = xkl_config_rec_new ();
+    if (!xkl_config_rec_get_from_server (config, xkl_engine))
+    {
+        g_object_unref (config);
+        g_warning ("Failed to get Xkl configuration from server");
+        return;
+    }
+
+    config_item = xkl_config_item_new ();
+    registry = xkl_config_registry_get_instance (xkl_engine);
+    xkl_config_registry_load (registry, FALSE);
+
+    for (i = 0; config->layouts[i] != NULL; ++i)
+    {
+        const gchar *layout = config->layouts[i] ? config->layouts[i] : "";
+        const gchar *variant = config->variants[i] ? config->variants[i] : "";
+        gchar *label = strlen (variant) > 0 ? g_strdup_printf ("%s_%s", layout, variant) : g_strdup (layout);
+
+        GtkWidget *menuitem = gtk_radio_menu_item_new (menu_group);
+        menu_group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+
+        g_snprintf (config_item->name, sizeof (config_item->name), "%s", variant);
+        if (xkl_config_registry_find_variant (registry, layout, config_item))
+            gtk_menu_item_set_label (GTK_MENU_ITEM (menuitem), config_item->description);
+        else
+        {
+            g_snprintf (config_item->name, sizeof (config_item->name), "%s", layout);
+            if (xkl_config_registry_find_layout (registry, config_item))
+                gtk_menu_item_set_label (GTK_MENU_ITEM (menuitem), config_item->description);
+            else
+                gtk_menu_item_set_label (GTK_MENU_ITEM (menuitem), label);
+        }
+
+        g_object_set_data_full (G_OBJECT (menuitem), LAYOUT_DATA_LABEL, label, g_free);
+        g_object_set_data (G_OBJECT (menuitem), LAYOUT_DATA_GROUP, GINT_TO_POINTER (i));
+
+        g_signal_connect (G_OBJECT (menuitem), "activate", G_CALLBACK (layout_selected_cb), NULL);
+        gtk_menu_shell_append (GTK_MENU_SHELL (layout_menu), menuitem);
+        gtk_widget_show (GTK_WIDGET (menuitem));
+    }
+
+    g_object_unref (registry);
+    g_object_unref (config_item);
+    g_object_unref (config);
+    #else
+    GSList *menu_group = NULL;
+    GList *item;
+
+    g_list_free_full (gtk_container_get_children (GTK_CONTAINER (layout_menu)),
+                      (GDestroyNotify)gtk_widget_destroy);
+
+    for (item = lightdm_get_layouts (); item; item = g_list_next (item))
+    {
+        LightDMLayout *layout = item->data;
+        GtkWidget *menuitem = gtk_radio_menu_item_new (menu_group);
+        menu_group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+
+        g_object_set_data_full (G_OBJECT (menuitem), LAYOUT_DATA_LABEL,
+                                g_strdelimit (g_strdup (lightdm_layout_get_name (layout)), "\t ", '_'), g_free);
+        g_object_set_data_full (G_OBJECT (menuitem), LAYOUT_DATA_NAME,
+                                g_strdup (lightdm_layout_get_name (layout)), g_free);
+
+        g_signal_connect (G_OBJECT (menuitem), "activate", G_CALLBACK (layout_selected_cb), NULL);
+        gtk_menu_item_set_label (GTK_MENU_ITEM (menuitem), lightdm_layout_get_description (layout));
+        gtk_menu_shell_append (GTK_MENU_SHELL (layout_menu), menuitem);
+        gtk_widget_show (GTK_WIDGET (menuitem));
+    }
+    #endif
+}
+
+static void
+update_layouts_menu_state (void)
+{
+    #ifdef HAVE_LIBXKLAVIER
+    XklState *state = xkl_engine_get_current_state (xkl_engine);
+    GList *menu_items = gtk_container_get_children (GTK_CONTAINER (layout_menu));
+    GtkCheckMenuItem *menu_item = g_list_nth_data (menu_items, state->group);
+
+    if (menu_item)
+    {
+        gtk_menu_item_set_label (GTK_MENU_ITEM (layout_menuitem),
+                                 g_object_get_data (G_OBJECT (menu_item), LAYOUT_DATA_LABEL));
+        gtk_check_menu_item_set_active(menu_item, TRUE);
+    }
+    else
+        gtk_menu_item_set_label (GTK_MENU_ITEM (layout_menuitem), "??");
+    g_list_free (menu_items);
+    #else
+    LightDMLayout *layout = lightdm_get_layout ();
+    g_return_if_fail (layout != NULL);
+
+    const gchar *name = lightdm_layout_get_name (layout);
+    GList *menu_items = gtk_container_get_children (GTK_CONTAINER (layout_menu));
+    GList *menu_iter;
+    for (menu_iter = menu_items; menu_iter; menu_iter = g_list_next (menu_iter))
+    {
+        if (g_strcmp0 (name, g_object_get_data (G_OBJECT (menu_iter->data), LAYOUT_DATA_NAME)) == 0)
+        {
+            gtk_check_menu_item_set_active (menu_iter->data, TRUE);
+            gtk_menu_item_set_label (GTK_MENU_ITEM (layout_menuitem),
+                                     g_object_get_data (G_OBJECT (menu_iter->data), LAYOUT_DATA_LABEL));
+            break;
+        }
+    }
+    g_list_free (menu_items);
+    #endif
+}
+
+#ifdef HAVE_LIBXKLAVIER
+static void
+xkl_state_changed_cb (XklEngine *engine, XklEngineStateChange change, gint group,
+                      gboolean restore, gpointer user_data)
+{
+    if (change == GROUP_CHANGED)
+        update_layouts_menu_state ();
+}
+
+static void
+xkl_config_changed_cb (XklEngine *engine, gpointer user_data)
+{
+    /* tip: xkl_config_rec_get_from_server() return old settings */
+    update_layouts_menu ();
+    update_layouts_menu_state ();
+}
+
+static GdkFilterReturn
+xkl_xevent_filter (GdkXEvent *xev, GdkEvent *event, gpointer  data)
+{
+    XEvent *xevent = (XEvent *) xev;
+    xkl_engine_filter_events (xkl_engine, xevent);
+    return GDK_FILTER_CONTINUE;
+}
+#endif
+
 int
 main (int argc, char **argv)
 {
     GKeyFile *config;
-    GdkRectangle monitor_geometry;
     GtkBuilder *builder;
     const GList *items, *item;
-    GtkCellRenderer *renderer;
-    GtkWidget *image, *infobar_compat, *content_area;
-    gchar *value, *state_dir;
-#if GTK_CHECK_VERSION (3, 0, 0)
-    GdkRGBA background_color;
+    GtkWidget *image;
+    gchar *value, **values, *state_dir;
     GtkIconTheme *icon_theme;
     GtkCssProvider *css_provider;
-#else
-    GdkColor background_color;
-#endif
     GError *error = NULL;
-
-    /* Background windows */
-    gint monitor, scr;
-    gint numScreens = 1;
-    GdkScreen *screen;
-    GtkWidget *window;
-
-    Display* display;
+    Display *display;
 
     #ifdef START_INDICATOR_SERVICES
     GPid indicator_pid = 0, spi_pid = 0;
@@ -2267,6 +2309,9 @@ main (int argc, char **argv)
     /* Disable global menus */
     g_unsetenv ("UBUNTU_MENUPROXY");
 
+    /* LP: #1024482 */
+    g_setenv ("GDK_CORE_DEVICE_EVENTS", "1", TRUE);
+
     /* Initialize i18n */
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
@@ -2274,12 +2319,6 @@ main (int argc, char **argv)
     textdomain (GETTEXT_PACKAGE);
 
     g_unix_signal_add(SIGTERM, (GSourceFunc)gtk_main_quit, NULL);
-
-#if GTK_CHECK_VERSION (3, 0, 0)
-#else
-    /* init threads */
-    gdk_threads_init();
-#endif
 
     /* init gtk */
     gtk_init (&argc, &argv);
@@ -2316,42 +2355,6 @@ main (int argc, char **argv)
     /* Set default cursor */
     gdk_window_set_cursor (gdk_get_default_root_window (), gdk_cursor_new (GDK_LEFT_PTR));
 
-    /* Load background */
-    value = g_key_file_get_value (config, "greeter", "background", NULL);
-    if (!value)
-        value = g_strdup ("#000000");
-#if GTK_CHECK_VERSION (3, 0, 0)
-    if (!gdk_rgba_parse (&background_color, value))
-#else
-    if (!gdk_color_parse (value, &background_color))
-#endif
-    {
-        gchar *path;
-        GError *error = NULL;
-
-        if (g_path_is_absolute (value))
-            path = g_strdup (value);
-        else
-            path = g_build_filename (GREETER_DATA_DIR, value, NULL);
-
-        g_debug ("Loading background %s", path);
-        default_background_pixbuf = gdk_pixbuf_new_from_file (path, &error);
-        if (!default_background_pixbuf)
-            g_warning ("Failed to load background: %s", error->message);
-        g_clear_error (&error);
-        g_free (path);
-    }
-    else
-    {
-        g_debug ("Using background color %s", value);
-#if GTK_CHECK_VERSION (3, 0, 0)
-        default_background_color = gdk_rgba_copy (&background_color);
-#else
-        default_background_color = gdk_color_copy (&background_color);
-#endif
-    }
-    g_free (value);
-
     /* Make the greeter behave a bit more like a screensaver if used as un/lock-screen by blanking the screen */
     gchar* end_ptr = NULL;
     int screensaver_timeout = 60;
@@ -2361,10 +2364,11 @@ main (int argc, char **argv)
     g_free (value);
     
     display = gdk_x11_display_get_xdisplay(gdk_display_get_default ());
-    if (lightdm_greeter_get_lock_hint (greeter)) {
-        XGetScreenSaver(display, &timeout, &interval, &prefer_blanking, &allow_exposures);
-        XForceScreenSaver(display, ScreenSaverActive);
-        XSetScreenSaver(display, screensaver_timeout, 0, ScreenSaverActive, DefaultExposures);
+    if (lightdm_greeter_get_lock_hint (greeter))
+    {
+        XGetScreenSaver (display, &timeout, &interval, &prefer_blanking, &allow_exposures);
+        XForceScreenSaver (display, ScreenSaverActive);
+        XSetScreenSaver (display, screensaver_timeout, 0, ScreenSaverActive, DefaultExposures);
     }
 
     /* Set GTK+ settings */
@@ -2415,15 +2419,7 @@ main (int argc, char **argv)
     if (value)
         g_object_set (gtk_settings_get_default (), "gtk-xft-rgba", value, NULL);
     g_free (value);
-    
-    /* Get a11y on screen keyboard command*/
-    gint argp;
-    value = g_key_file_get_value (config, "greeter", "keyboard", NULL);
-    g_debug ("a11y keyboard command is '%s'", value);
-    /* Set NULL to blank to avoid warnings */
-    if (!value) { value = g_strdup(""); }
-    g_shell_parse_argv (value, &argp, &a11y_keyboard_command, NULL);
-    g_free (value);
+
 
     builder = gtk_builder_new ();
     if (!gtk_builder_add_from_string (builder, lightdm_gtk_greeter_ui,
@@ -2434,85 +2430,39 @@ main (int argc, char **argv)
     }
     g_clear_error (&error);
     
-    /* Panel */
-    panel_window = GTK_WINDOW (gtk_builder_get_object (builder, "panel_window"));
-#if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(panel_window))), "lightdm-gtk-greeter");
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(panel_window))), GTK_STYLE_CLASS_MENUBAR);
-    g_signal_connect (G_OBJECT (panel_window), "draw", G_CALLBACK (background_window_draw), NULL);
-#endif
-    gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "hostname_label")), lightdm_get_hostname ());
-    session_menu = GTK_MENU(gtk_builder_get_object (builder, "session_menu"));
-    language_menu = GTK_MENU(gtk_builder_get_object (builder, "language_menu"));
-    clock_label = GTK_WIDGET(gtk_builder_get_object (builder, "clock_label"));
-    menubar = GTK_WIDGET (gtk_builder_get_object (builder, "menubar"));
-    /* Never allow the panel-window to be moved via the menubar */
-#if GTK_CHECK_VERSION (3, 0, 0) 
-    css_provider = gtk_css_provider_new ();
-    gtk_css_provider_load_from_data (css_provider, "* { -GtkWidget-window-dragging: false; }", -1, NULL);
-    gtk_style_context_add_provider (GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(menubar))), GTK_STYLE_PROVIDER (css_provider), 800);
-#endif
-    
-    keyboard_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "keyboard_menuitem"));
-
     /* Login window */
     login_window = GTK_WINDOW (gtk_builder_get_object (builder, "login_window"));
     user_image = GTK_IMAGE (gtk_builder_get_object (builder, "user_image"));
     user_combo = GTK_COMBO_BOX (gtk_builder_get_object (builder, "user_combobox"));
     username_entry = GTK_ENTRY (gtk_builder_get_object (builder, "username_entry"));
     password_entry = GTK_ENTRY (gtk_builder_get_object (builder, "password_entry"));
-
-    /* Add InfoBar via code for GTK+2 compatability */
-    infobar_compat = GTK_WIDGET(gtk_builder_get_object(builder, "infobar_compat"));
-    info_bar = GTK_INFO_BAR (gtk_info_bar_new());
-    gtk_info_bar_set_message_type(info_bar, GTK_MESSAGE_ERROR);
-    gtk_widget_set_name(GTK_WIDGET(info_bar), "greeter_infobar");
-    content_area = gtk_info_bar_get_content_area(info_bar);
-
+    info_bar = GTK_INFO_BAR (gtk_builder_get_object (builder, "greeter_infobar"));
     message_label = GTK_LABEL (gtk_builder_get_object (builder, "message_label"));
-    g_object_ref(message_label);
-    gtk_container_remove(GTK_CONTAINER(infobar_compat), GTK_WIDGET(message_label));
-    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(message_label));
-    g_object_unref(message_label);
-
-    gtk_container_add(GTK_CONTAINER(infobar_compat), GTK_WIDGET(info_bar));
-
     cancel_button = GTK_BUTTON (gtk_builder_get_object (builder, "cancel_button"));
     login_button = GTK_BUTTON (gtk_builder_get_object (builder, "login_button"));
 
-#if GTK_CHECK_VERSION (3, 0, 0)
-    g_signal_connect (G_OBJECT (login_window), "draw", G_CALLBACK (login_window_draw), NULL);
-#else
-    g_signal_connect (G_OBJECT (login_window), "size-allocate", G_CALLBACK (login_window_size_allocate), NULL);
-#endif
-
-    /* To maintain compatability with GTK+2, set special properties here */
-#if GTK_CHECK_VERSION (3, 0, 0)
-    gtk_style_context_add_class(GTK_STYLE_CONTEXT(gtk_widget_get_style_context(GTK_WIDGET(login_window))), "lightdm-gtk-greeter");
-    gtk_box_set_child_packing(GTK_BOX(content_area), GTK_WIDGET(message_label), TRUE, TRUE, 0, GTK_PACK_START);
-    gtk_window_set_has_resize_grip(GTK_WINDOW(panel_window), FALSE);
-    gtk_widget_set_margin_top(GTK_WIDGET(user_combo), 12);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(password_entry), 12);
-    gtk_entry_set_placeholder_text(password_entry, _("Enter your password"));
-    gtk_entry_set_placeholder_text(username_entry, _("Enter your username"));
-    icon_theme = gtk_icon_theme_get_default();
-#else
-    gtk_container_set_border_width (GTK_CONTAINER(gtk_builder_get_object (builder, "vbox2")), 18);
-    gtk_container_set_border_width (GTK_CONTAINER(gtk_builder_get_object (builder, "content_frame")), 14);
-    gtk_container_set_border_width (GTK_CONTAINER(gtk_builder_get_object (builder, "buttonbox_frame")), 8);
-    gtk_widget_set_tooltip_text(GTK_WIDGET(password_entry), _("Enter your password"));
-    gtk_widget_set_tooltip_text(GTK_WIDGET(username_entry), _("Enter your username"));
-#endif
-
-    /* Indicators */
+    /* Panel */
+    panel_window = GTK_WINDOW (gtk_builder_get_object (builder, "panel_window"));
+    menubar = GTK_WIDGET (gtk_builder_get_object (builder, "menubar"));
     session_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "session_menuitem"));
+    session_menu = GTK_MENU (gtk_builder_get_object (builder, "session_menu"));
     language_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "language_menuitem"));
+    language_menu = GTK_MENU (gtk_builder_get_object (builder, "language_menu"));
     a11y_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "a11y_menuitem"));
+    contrast_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "high_contrast_menuitem"));
+    font_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "large_font_menuitem"));
+    keyboard_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "keyboard_menuitem"));
+    reader_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "reader_menuitem"));
     power_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "power_menuitem"));
+    layout_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "layout_menuitem"));
+    layout_menu = GTK_MENU(gtk_builder_get_object (builder, "layout_menu"));
+    clock_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "clock_menuitem"));
+    host_menuitem = GTK_WIDGET (gtk_builder_get_object (builder, "host_menuitem"));
 
     gtk_accel_map_add_entry ("<Login>/a11y/font", GDK_KEY_F1, 0);
     gtk_accel_map_add_entry ("<Login>/a11y/contrast", GDK_KEY_F2, 0);
     gtk_accel_map_add_entry ("<Login>/a11y/keyboard", GDK_KEY_F3, 0);
+    gtk_accel_map_add_entry ("<Login>/a11y/reader", GDK_KEY_F4, 0);
     gtk_accel_map_add_entry ("<Login>/power/shutdown", GDK_KEY_F4, GDK_MOD1_MASK);
 
 #ifdef START_INDICATOR_SERVICES
@@ -2521,43 +2471,41 @@ main (int argc, char **argv)
     init_indicators (config);
 #endif
 
-    value = g_key_file_get_value (config, "greeter", "default-user-image", NULL);
-    if (value)
+    if (g_key_file_get_boolean(config, "greeter", "hide-user-image", NULL))
     {
-        if (value[0] == '#')
-            default_user_icon = g_strdup (value + 1);
-        else
+        gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "user_image_border")));
+        gtk_widget_hide (GTK_WIDGET (user_image));  /* Hide to mark image is disabled */
+        gtk_widget_set_size_request (GTK_WIDGET (user_combo), 250, -1);
+    }
+    else
+    {
+        value = g_key_file_get_value (config, "greeter", "default-user-image", NULL);
+        if (value)
         {
-            default_user_pixbuf = gdk_pixbuf_new_from_file (value, &error);
-            if (!default_user_pixbuf)
+            if (value[0] == '#')
+                default_user_icon = g_strdup (value + 1);
+            else
             {
-                g_warning ("Failed to load default user image: %s", error->message);
-                g_clear_error (&error);
+                default_user_pixbuf = gdk_pixbuf_new_from_file (value, &error);
+                if (!default_user_pixbuf)
+                {
+                    g_warning ("Failed to load default user image: %s", error->message);
+                    g_clear_error (&error);
+                }
             }
+            g_free (value);
         }
-        g_free (value);
     }
 
-    /* Clock */
-    gtk_widget_set_no_show_all(GTK_WIDGET(clock_label),
-                           !g_key_file_get_boolean (config, "greeter", "show-clock", NULL));
-    gtk_widget_show_all(GTK_WIDGET(clock_label));
-    clock_format = g_key_file_get_value (config, "greeter", "clock-format", NULL);
-    if (!clock_format)
-        clock_format = "%a, %H:%M";
-    clock_timeout_thread();
+    icon_theme = gtk_icon_theme_get_default ();
 
     /* Session menu */
     if (gtk_widget_get_visible (session_menuitem))
     {
-#if GTK_CHECK_VERSION (3, 0, 0)
-        if (gtk_icon_theme_has_icon(icon_theme, "document-properties-symbolic"))
+        if (gtk_icon_theme_has_icon (icon_theme, "document-properties-symbolic"))
             session_badge = gtk_image_new_from_icon_name ("document-properties-symbolic", GTK_ICON_SIZE_MENU);
         else
             session_badge = gtk_image_new_from_icon_name ("document-properties", GTK_ICON_SIZE_MENU);
-#else
-        session_badge = gtk_image_new_from_icon_name ("document-properties", GTK_ICON_SIZE_MENU);
-#endif
         gtk_widget_show (session_badge);
         gtk_container_add (GTK_CONTAINER (session_menuitem), session_badge);
 
@@ -2567,9 +2515,9 @@ main (int argc, char **argv)
         {
             LightDMSession *session = item->data;
             GtkWidget *radiomenuitem;
-            
+
             radiomenuitem = gtk_radio_menu_item_new_with_label (sessions, lightdm_session_get_name (session));
-            g_object_set_data (G_OBJECT (radiomenuitem), "session-key", (gpointer) lightdm_session_get_key (session));
+            g_object_set_data (G_OBJECT (radiomenuitem), SESSION_DATA_KEY, (gpointer) lightdm_session_get_key (session));
             sessions = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (radiomenuitem));
             g_signal_connect(G_OBJECT(radiomenuitem), "activate", G_CALLBACK(session_selected_cb), NULL);
             gtk_menu_shell_append (GTK_MENU_SHELL(session_menu), radiomenuitem);
@@ -2595,7 +2543,7 @@ main (int argc, char **argv)
                 label = g_strdup_printf ("%s - %s", lightdm_language_get_name (language), country);
             else
                 label = g_strdup (lightdm_language_get_name (language));
-                
+
             code = lightdm_language_get_code (language);
             gchar *modifier = strchr (code, '@');
             if (modifier != NULL)
@@ -2606,7 +2554,7 @@ main (int argc, char **argv)
             }
 
             radiomenuitem = gtk_radio_menu_item_new_with_label (languages, label);
-            g_object_set_data (G_OBJECT (radiomenuitem), "language-code", (gpointer) code);
+            g_object_set_data (G_OBJECT (radiomenuitem), LANGUAGE_DATA_CODE, (gpointer) code);
             languages = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (radiomenuitem));
             g_signal_connect(G_OBJECT(radiomenuitem), "activate", G_CALLBACK(language_selected_cb), NULL);
             gtk_menu_shell_append (GTK_MENU_SHELL(language_menu), radiomenuitem);
@@ -2614,33 +2562,39 @@ main (int argc, char **argv)
         }
         set_language (NULL);
     }
-    
+
     /* a11y menu */
     if (gtk_widget_get_visible (a11y_menuitem))
     {
-    #if GTK_CHECK_VERSION (3, 0, 0)
         if (gtk_icon_theme_has_icon(icon_theme, "preferences-desktop-accessibility-symbolic"))
             image = gtk_image_new_from_icon_name ("preferences-desktop-accessibility-symbolic", GTK_ICON_SIZE_MENU);
         else
             image = gtk_image_new_from_icon_name ("preferences-desktop-accessibility", GTK_ICON_SIZE_MENU);
-    #else
-        image = gtk_image_new_from_icon_name ("preferences-desktop-accessibility", GTK_ICON_SIZE_MENU);
-    #endif
         gtk_widget_show (image);
         gtk_container_add (GTK_CONTAINER (a11y_menuitem), image);
     }
 
+    value = g_key_file_get_value (config, "greeter", "keyboard", NULL);
+    a11y_keyboard_command = menu_command_parse_extended (value, keyboard_menuitem, "onboard", "--xid",
+                                                         &ONBOARD_WINDOW_SIZE);
+    g_free (value);
+
+    gtk_widget_set_visible (keyboard_menuitem, a11y_keyboard_command != NULL);
+    if (a11y_keyboard_command)
+        g_signal_connect (a11y_keyboard_command->widget, "size-allocate", G_CALLBACK (center_window), (gpointer)&ONBOARD_WINDOW_POS);
+
+    value = g_key_file_get_value (config, "greeter", "reader", NULL);
+    a11y_reader_command = menu_command_parse (value, reader_menuitem);
+    gtk_widget_set_visible (reader_menuitem, a11y_reader_command != NULL);
+    g_free (value);
+
     /* Power menu */
     if (gtk_widget_get_visible (power_menuitem))
     {
-#if GTK_CHECK_VERSION (3, 0, 0)
         if (gtk_icon_theme_has_icon(icon_theme, "system-shutdown-symbolic"))
             image = gtk_image_new_from_icon_name ("system-shutdown-symbolic", GTK_ICON_SIZE_MENU);
         else
             image = gtk_image_new_from_icon_name ("system-shutdown", GTK_ICON_SIZE_MENU);
-#else
-        image = gtk_image_new_from_icon_name ("system-shutdown", GTK_ICON_SIZE_MENU);
-#endif
         gtk_widget_show (image);
         gtk_container_add (GTK_CONTAINER (power_menuitem), image);
 
@@ -2652,67 +2606,127 @@ main (int argc, char **argv)
         g_signal_connect (G_OBJECT (power_menuitem),"activate", G_CALLBACK(power_menu_cb), NULL);
     }
 
-    /* Users combobox */
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (user_combo), renderer, TRUE);
-    gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (user_combo), renderer, "text", 1);
-    gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (user_combo), renderer, "weight", 2);
-
-    #if GDK_VERSION_CUR_STABLE < G_ENCODE_VERSION(3, 10)
-        numScreens = gdk_display_get_n_screens (gdk_display_get_default());
-    #endif
-
-    /* Set up the background images */	
-    for (scr = 0; scr < numScreens; scr++)
+    /* Layout menu */
+    if (gtk_widget_get_visible (layout_menuitem))
     {
-        screen = gdk_display_get_screen (gdk_display_get_default (), scr);
-        for (monitor = 0; monitor < gdk_screen_get_n_monitors (screen); monitor++)
+        #ifdef HAVE_LIBXKLAVIER
+        xkl_engine = xkl_engine_get_instance (XOpenDisplay (NULL));
+        if (xkl_engine)
         {
-            gdk_screen_get_monitor_geometry (screen, monitor, &monitor_geometry);
-        
-            window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-            gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DESKTOP);
-#if GTK_CHECK_VERSION (3, 0, 0)
-            gtk_widget_override_background_color(GTK_WIDGET(window), GTK_STATE_FLAG_NORMAL, &background_color);
-#else
-            gtk_widget_modify_bg(GTK_WIDGET(window), GTK_STATE_NORMAL, &background_color);
-#endif
-            gtk_window_set_screen(GTK_WINDOW(window), screen);
-            gtk_window_set_keep_below(GTK_WINDOW(window), TRUE);
-            gtk_widget_set_size_request(window, monitor_geometry.width, monitor_geometry.height);
-            gtk_window_set_resizable (GTK_WINDOW(window), FALSE);
-            gtk_widget_set_app_paintable (GTK_WIDGET(window), TRUE);
-            gtk_window_move (GTK_WINDOW(window), monitor_geometry.x, monitor_geometry.y);
+            xkl_engine_start_listen (xkl_engine, XKLL_TRACK_KEYBOARD_STATE);
+            g_signal_connect (xkl_engine, "X-state-changed",
+                              G_CALLBACK (xkl_state_changed_cb), NULL);
+            g_signal_connect (xkl_engine, "X-config-changed",
+                              G_CALLBACK (xkl_config_changed_cb), NULL);
+            gdk_window_add_filter (NULL, (GdkFilterFunc) xkl_xevent_filter, NULL);
 
-            backgrounds = g_slist_prepend(backgrounds, window);
-            gtk_widget_show (window);
-#if GTK_CHECK_VERSION (3, 0, 0)
-            g_signal_connect (G_OBJECT (window), "draw", G_CALLBACK (background_window_draw), NULL);
-#else
-            g_signal_connect (G_OBJECT (window), "expose-event", G_CALLBACK (background_window_expose), NULL);
-#endif
-            gtk_widget_queue_draw (GTK_WIDGET(window));
+            /* refresh */
+            XklConfigRec *config_rec = xkl_config_rec_new ();
+            if (xkl_config_rec_get_from_server (config_rec, xkl_engine))
+                xkl_config_rec_activate (config_rec, xkl_engine);
+            g_object_unref (config_rec);
         }
+        else
+        {
+            g_warning ("Failed to get XklEngine instance");
+            gtk_widget_hide (layout_menuitem);
+        }
+        #endif
+        update_layouts_menu ();
+        update_layouts_menu_state ();
     }
-    backgrounds = g_slist_reverse(backgrounds);
+
+    /* Host label */
+    if (gtk_widget_get_visible (host_menuitem))
+        gtk_menu_item_set_label (GTK_MENU_ITEM (host_menuitem), lightdm_get_hostname ());
+
+    /* Clock label */
+    if (gtk_widget_get_visible (clock_menuitem))
+    {
+        gtk_menu_item_set_label (GTK_MENU_ITEM (clock_menuitem), "");
+        clock_label = gtk_bin_get_child (GTK_BIN (clock_menuitem));
+        clock_format = g_key_file_get_value (config, "greeter", "clock-format", NULL);
+        if (!clock_format)
+            clock_format = "%a, %H:%M";
+        clock_timeout_thread ();
+        gdk_threads_add_timeout (1000, (GSourceFunc) clock_timeout_thread, NULL);
+    }
+
+    /* A bit of CSS */
+    GdkRGBA lightdm_gtk_greeter_override_defaults;
+    css_provider = gtk_css_provider_new ();
+    gtk_css_provider_load_from_data (css_provider, lightdm_gtk_greeter_css_application, lightdm_gtk_greeter_css_application_length, NULL);
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default (), GTK_STYLE_PROVIDER (css_provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    css_provider = gtk_css_provider_new ();
+    guint fallback_css_priority = GTK_STYLE_PROVIDER_PRIORITY_APPLICATION;
+    if (gtk_style_context_lookup_color (gtk_widget_get_style_context (GTK_WIDGET (login_window)),
+                                        "lightdm-gtk-greeter-override-defaults",
+                                        &lightdm_gtk_greeter_override_defaults))
+        fallback_css_priority = GTK_STYLE_PROVIDER_PRIORITY_FALLBACK;
+    gtk_css_provider_load_from_data (css_provider, lightdm_gtk_greeter_css_fallback, lightdm_gtk_greeter_css_fallback_length, NULL);
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default (), GTK_STYLE_PROVIDER (css_provider),
+                                              fallback_css_priority);
+
+    /* Background */
+    greeter_background = greeter_background_new ();
+
+    value = g_key_file_get_value (config, "greeter", "active-monitor", NULL);
+    greeter_background_set_active_monitor_config (greeter_background, value ? value : "#cursor");
+    g_free (value);
+
+    value = g_key_file_get_value (config, "greeter", "background", NULL);
+    greeter_background_set_default_config (greeter_background, value,
+                                           key_file_get_boolean_extended (config, "greeter", "user-background", TRUE),
+                                           key_file_get_boolean_extended (config, "greeter", "laptop", FALSE));
+    g_free (value);
+
+    const gchar *CONFIG_MONITOR_PREFIX = "monitor:";
+    gchar **config_group;
+    gchar **config_groups = g_key_file_get_groups (config, NULL);
+    for (config_group = config_groups; *config_group; ++config_group)
+    {
+        if (!g_str_has_prefix (*config_group, CONFIG_MONITOR_PREFIX))
+            continue;
+        const gchar *name = *config_group + sizeof(CONFIG_MONITOR_PREFIX);
+        while (*name && g_ascii_isspace (*name))
+            ++name;
+        g_debug ("Monitor configuration found: '%s'", name);
+
+        GError *user_bg_error = NULL, *laptop_error = NULL;
+        gboolean user_bg = g_key_file_get_boolean (config, *config_group, "user-background", &user_bg_error);
+        gboolean laptop = g_key_file_get_boolean (config, *config_group, "laptop", &laptop_error);
+        value = g_key_file_get_value (config, *config_group, "background", NULL);
+
+        greeter_background_set_monitor_config (greeter_background, name, value,
+                                               user_bg, user_bg_error == NULL,
+                                               laptop, laptop_error == NULL);
+
+        g_free (value);
+        g_clear_error (&laptop_error);
+        g_clear_error (&user_bg_error);
+    }
+    g_strfreev (config_groups);
+
+    g_signal_connect (G_OBJECT (greeter_background), "active-monitor-changed", G_CALLBACK (active_monitor_changed_cb), NULL);
+    greeter_background_add_subwindow (greeter_background, login_window);
+    greeter_background_add_subwindow (greeter_background, panel_window);
+    greeter_background_connect (greeter_background, gdk_screen_get_default ());
 
     if (lightdm_greeter_get_hide_users_hint (greeter))
     {
-        /* Set the background to default */
-        set_background (NULL);
+        set_user_image (NULL);
         start_authentication ("*other");
     }
     else
     {
-        /* This also sets the background to user's */
         load_user_list ();
         gtk_widget_hide (GTK_WIDGET (cancel_button));
         gtk_widget_show (GTK_WIDGET (user_combo));
     }
 
-    /* Window position */
-    /* Default: x-center, y-center */
-    main_window_pos = CENTERED_WINDOW_POS;
+    /* Windows positions */
+    main_window_pos = WINDOW_POS_CENTER;
     value = g_key_file_get_value (config, "greeter", "position", NULL);
     if (value)
     {
@@ -2728,55 +2742,64 @@ main (int argc, char **argv)
 
         g_free (value);
     }
+    panel_window_pos = WINDOW_POS_TOP_LEFT;
 
     gtk_builder_connect_signals(builder, greeter);
 
-    gtk_widget_show (GTK_WIDGET (login_window));
-    center_window (login_window,  NULL, &main_window_pos);
-    g_signal_connect (GTK_WIDGET (login_window), "size-allocate", G_CALLBACK (center_window), &main_window_pos);
-
     gtk_widget_show (GTK_WIDGET (panel_window));
-    GtkAllocation allocation;
-    gtk_widget_get_allocation (GTK_WIDGET (panel_window), &allocation);
-    gdk_screen_get_monitor_geometry (gdk_screen_get_default (), gdk_screen_get_primary_monitor (gdk_screen_get_default ()), &monitor_geometry);
-    gtk_window_resize (panel_window, monitor_geometry.width, allocation.height);
-    gtk_window_move (panel_window, monitor_geometry.x, monitor_geometry.y);
+    center_window (panel_window, NULL, &panel_window_pos);
+    g_signal_connect (GTK_WIDGET (panel_window), "size-allocate", G_CALLBACK (center_window), &panel_window_pos);
 
     gtk_widget_show (GTK_WIDGET (login_window));
+    center_window (login_window, NULL, &main_window_pos);
+    g_signal_connect (GTK_WIDGET (login_window), "size-allocate", G_CALLBACK (center_window), &main_window_pos);
     gdk_window_focus (gtk_widget_get_window (GTK_WIDGET (login_window)), GDK_CURRENT_TIME);
 
-    if (a11y_keyboard_command)
+    values = g_key_file_get_string_list (config, "greeter", "a11y-states", NULL, NULL);
+    if (values && *values)
     {
-        /* If command is onboard, position the application at the bottom-center of the screen */
-        if (g_strcmp0(a11y_keyboard_command[0], "onboard") == 0)
+        GHashTable *items = g_hash_table_new (g_str_hash, g_str_equal);
+        g_hash_table_insert (items, "contrast", contrast_menuitem);
+        g_hash_table_insert (items, "font", font_menuitem);
+        g_hash_table_insert (items, "keyboard", keyboard_menuitem);
+        g_hash_table_insert (items, "reader", reader_menuitem);
+
+        gpointer item;
+        gchar **values_iter;
+        for (values_iter = values; *values_iter; ++values_iter)
         {
-            gint argp;
-            value = "onboard --xid";
-            g_debug ("a11y keyboard command is now '%s'", value);
-            g_shell_parse_argv (value, &argp, &a11y_keyboard_command, NULL);
-            onboard_window = GTK_WINDOW (gtk_window_new(GTK_WINDOW_TOPLEVEL));
-            gtk_widget_set_size_request (GTK_WIDGET (onboard_window), 605, 205);
-            gtk_window_move (onboard_window, (monitor_geometry.width - 605)/2, monitor_geometry.height - 205);
+            value = *values_iter;
+            switch (value[0])
+            {
+            case '-':
+                continue;
+            case '+':
+                if (g_hash_table_lookup_extended (items, &value[1], NULL, &item) &&
+                    gtk_widget_get_visible (GTK_WIDGET (item)))
+                        gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), TRUE);
+                break;
+            case '~':
+                value++;
+            default:
+                if (g_hash_table_lookup_extended (items, value, NULL, &item) &&
+                    gtk_widget_get_visible (GTK_WIDGET (item)))
+                {
+                    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item),
+                                                    g_key_file_get_boolean (state, "a11y-states", value, NULL));
+                    g_signal_connect (G_OBJECT (item), "toggled", G_CALLBACK (a11y_menuitem_toggled_cb), g_strdup (value));
+                }
+            }
         }
+        g_hash_table_unref (items);
     }
-    gtk_widget_set_sensitive (keyboard_menuitem, a11y_keyboard_command != NULL);
-    gtk_widget_set_visible (keyboard_menuitem, a11y_keyboard_command != NULL);
-    gdk_threads_add_timeout (1000, (GSourceFunc) clock_timeout_thread, NULL);
+    g_strfreev (values);
 
     /* focus fix (source: unity-greeter) */
     GdkWindow* root_window = gdk_get_default_root_window ();
     gdk_window_set_events (root_window, gdk_window_get_events (root_window) | GDK_SUBSTRUCTURE_MASK);
     gdk_window_add_filter (root_window, focus_upon_map, NULL);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
-#else
-    gdk_threads_enter();
-#endif
     gtk_main ();
-#if GTK_CHECK_VERSION (3, 0, 0)
-#else
-    gdk_threads_leave();
-#endif
 
 #ifdef START_INDICATOR_SERVICES
     if (indicator_pid)
@@ -2790,17 +2813,6 @@ main (int argc, char **argv)
 		kill (spi_pid, SIGTERM);
 		waitpid (spi_pid, NULL, 0);
     }
-#endif
-
-    if (background_pixbuf)
-        g_object_unref (background_pixbuf);
-    if (default_background_pixbuf)
-        g_object_unref (default_background_pixbuf);
-    if (default_background_color)
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gdk_rgba_free (default_background_color);
-#else
-        gdk_color_free (default_background_color);
 #endif
 
     return EXIT_SUCCESS;

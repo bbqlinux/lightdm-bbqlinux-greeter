@@ -18,6 +18,9 @@
 /* Define if "libindicator/indicator-ng.h" is present */
 #undef HAVE_LIBINDICATOR_NG
 
+/* Define if "libxklavier" is present */
+#undef HAVE_LIBXKLAVIER
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 

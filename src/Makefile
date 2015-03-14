@@ -82,7 +82,7 @@ DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/config.h.in COPYING compile config.guess config.sub \
-	install-sh missing ltmain.sh
+	depcomp install-sh missing ltmain.sh
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -227,8 +227,8 @@ GMODULE_CFLAGS = -pthread -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
 GMODULE_LIBS = -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0 
 GMSGFMT = /usr/bin/msgfmt
 GREP = /usr/bin/grep
-GTK_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libdrm -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz 
-GTK_LIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype 
+GTK_CFLAGS = -pthread -I/usr/include/gtk-3.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-3.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/harfbuzz -I/usr/include/libdrm -I/usr/include/libpng16 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng16 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+GTK_LIBS = -lgtk-3 -lgdk-3 -lpangocairo-1.0 -lpango-1.0 -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 
 INDICATORDIR = 
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -262,6 +262,8 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIBX11_CFLAGS = 
 LIBX11_LIBS = -lX11 
+LIBXKLAVIER_CFLAGS = 
+LIBXKLAVIER_LIBS = 
 LIGHTDMGOBJECT_CFLAGS = -pthread -I/usr/include/lightdm-gobject-1 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 
 LIGHTDMGOBJECT_LIBS = -llightdm-gobject-1 
 LIPO = 
@@ -282,10 +284,10 @@ OTOOL64 =
 PACKAGE = lightdm-gtk-greeter
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = lightdm-gtk-greeter
-PACKAGE_STRING = lightdm-gtk-greeter 1.8.5
+PACKAGE_STRING = lightdm-gtk-greeter 1.9.0
 PACKAGE_TARNAME = lightdm-gtk-greeter
 PACKAGE_URL = 
-PACKAGE_VERSION = 1.8.5
+PACKAGE_VERSION = 1.9.0
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -297,7 +299,7 @@ SHELL = /bin/sh
 STRIP = strip
 UNITY_INDICATORDIR = 
 USE_NLS = yes
-VERSION = 1.8.5
+VERSION = 1.9.0
 WARN_CFLAGS =  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs 
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /android/bbqlinux/github/lightdm-bbqlinux-greeter/src

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(lightdm-gtk-greeter, 1.8.5)
+AC_INIT(lightdm-gtk-greeter, 1.9.0)
 AC_CONFIG_MACRO_DIR(m4)
 AC_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
@@ -23,12 +23,7 @@ dnl ###########################################################################
 dnl Dependencies
 dnl ###########################################################################
 
-AC_ARG_WITH([gtk2], AS_HELP_STRING([--with-gtk2], [Use gtk+-2.0 instead of gtk+-3.0]))
-
-AS_IF([test "x$with_gtk2" = "xyes"],
-      [PKG_CHECK_MODULES([GTK], [gtk+-2.0], [have_gtk2=yes])],
-      [PKG_CHECK_MODULES([GTK], [gtk+-3.0])])
-
+PKG_CHECK_MODULES([GTK], [gtk+-3.0])
 PKG_CHECK_MODULES([GMODULE], [gmodule-export-2.0])
 PKG_CHECK_MODULES([LIGHTDMGOBJECT], [liblightdm-gobject-1 >= 1.3.5])
 PKG_CHECK_MODULES([LIBX11], [x11])
@@ -38,13 +33,8 @@ dnl Optional dependencies
 dnl ###########################################################################
 
 INDICATOR_REQUIRED_VERSION=0.3.92
-
-AS_IF([test "x$have_gtk2" = "xyes"],
-      [INDICATOR_PKG=indicator-0.4],
-      [
-       INDICATOR_PKG=indicator3-0.4
-       IDO_PKG=libido3-0.1
-      ])
+INDICATOR_PKG=indicator3-0.4
+IDO_PKG=libido3-0.1
 
 AC_ARG_ENABLE([libindicator],
     AC_HELP_STRING([--enable-libindicator], [Enable libindicator support])
@@ -84,7 +74,7 @@ AC_ARG_ENABLE([libido],
 
 AS_IF([test "x$enable_libido" = "xyes" && test "x$have_libindicator" = "xyes"], [
     AS_IF([$PKG_CONFIG --exists "$IDO_PKG" >/dev/null 2>&1], [
-        PKG_CHECK_MODULES([LIBIDO], [$IDO_PKG], [
+        PKG_CHECK_MODULES([LIBIDO], [$IDO_PKG >= 13.10], [
             AC_DEFINE([HAVE_LIBIDO], [1], [Define if "$IDO_PKG" is present])
         ])
     ], [
@@ -104,6 +94,15 @@ AC_ARG_ENABLE([indicator-services],
 AS_IF([test "x$enable_indicator_services" != "xno" && test "x$have_libindicator" = "xyes"], [
     AC_DEFINE([START_INDICATOR_SERVICES], [], [Try to start indicator-services])
 ])
+
+AC_ARG_WITH([libxklavier], AS_HELP_STRING([--with-libxklavier], [Use libxklavier to manage layouts (instead of LightDM API)]))
+
+AS_IF([test "x$with_libxklavier" = "xyes"],
+      [
+       PKG_CHECK_MODULES([LIBXKLAVIER], [libxklavier], [have_xklavier=yes])
+       AC_DEFINE([HAVE_LIBXKLAVIER], [1], [Define if "libxklavier" is present])
+      ],
+      [])
 
 dnl ###########################################################################
 dnl Internationalization
