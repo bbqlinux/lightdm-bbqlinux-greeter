@@ -1,6 +1,9 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Command to start at-spi service */
+#define AT_SPI_COMMAND "/usr/lib/at-spi2-core/at-spi-bus-launcher --launch-immediately"
+
 /* Gettext package */
 #define GETTEXT_PACKAGE "lightdm-gtk-greeter"
 
@@ -20,7 +23,7 @@
 /* #undef HAVE_LIBINDICATOR_NG */
 
 /* Define if "libxklavier" is present */
-/* #undef HAVE_LIBXKLAVIER */
+#define HAVE_LIBXKLAVIER 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -46,6 +49,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Command to start indicators service */
+#define INDICATOR_SERVICES_COMMAND "upstart --user --startup-event indicator-services-start"
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #define LT_OBJDIR ".libs/"
@@ -60,7 +66,7 @@
 #define PACKAGE_NAME "lightdm-gtk-greeter"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "lightdm-gtk-greeter 1.9.0"
+#define PACKAGE_STRING "lightdm-gtk-greeter 2.0.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "lightdm-gtk-greeter"
@@ -69,13 +75,10 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.9.0"
-
-/* Try to start indicator-services */
-/* #undef START_INDICATOR_SERVICES */
+#define PACKAGE_VERSION "2.0.0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.9.0"
+#define VERSION "2.0.0"

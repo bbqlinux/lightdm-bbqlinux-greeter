@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Command to start at-spi service */
+#undef AT_SPI_COMMAND
+
 /* Gettext package */
 #undef GETTEXT_PACKAGE
 
@@ -45,6 +48,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Command to start indicators service */
+#undef INDICATOR_SERVICES_COMMAND
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
@@ -69,9 +75,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Try to start indicator-services */
-#undef START_INDICATOR_SERVICES
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

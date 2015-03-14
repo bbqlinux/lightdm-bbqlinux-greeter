@@ -377,7 +377,8 @@ lightdm_gtk_greeter_LDADD = \
 	$(LIBX11_LIBS) \
 	$(LIBINDICATOR_LIBS) \
 	$(LIBIDO_LIBS) \
-	$(LIBXKLAVIER_LIBS)
+	$(LIBXKLAVIER_LIBS)\
+	-lm
 
 @MAINTAINER_MODE_TRUE@DISTCLEANFILES = \
 @MAINTAINER_MODE_TRUE@	$(lightdm_gtk_greeter_built_sources)

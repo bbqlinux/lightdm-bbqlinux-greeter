@@ -1,3 +1,165 @@
+2015-02-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Don't forget those translations
+
+2015-02-15  Sean Davis  <smd.seandavis@gmail.com>
+
+	Update for 2.0.0 release
+
+2015-02-10  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2015-02-04  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2015-01-27  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge pre2.0 fixes branch, tested, builds with make distcheck, all is well
+
+2015-01-26  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New configure options: "--enable-at-spi-command" and "--enable-indicator-services-command" (replaces "--enable-indicator-services"); using "upstart" instead of "init" (lp1398619)
+
+2015-01-23  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Strange loop in indicator_menu_show_cb()
+
+2015-01-23  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using INDICATOR_OBJECT_SIGNAL_ENTRY_SCROLLED signal
+
+2015-01-23  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Fix close_pid() regression
+
+2015-01-25  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2015-01-17  Simon Steinbeiß  <ochosi@shimmerproject.org>
+
+	Background crossfades when changing users
+	
+	The new option is enabled by default, can be modified with "transition-duration" (default: 500ms)
+
+2014-12-10  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Fixed: unfocused login window if greeter starts when laptop lid closed and laptop=true
+
+2014-11-29  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Prototypes
+
+2014-11-29  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Saving focus on active monitor changing
+
+2014-11-22  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New value for "background" option: #default, do not override default GtkWindow background
+
+2014-11-19  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Crash on Background.connnect; unrefing background pixbufs too early
+
+2014-11-15  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Using gtk_widget_add_tick_callback() for background animation
+
+2014-11-07  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Transition: timeout = 30, user background delay = 250
+
+2014-11-05  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Delay before changing to user's background
+
+2014-11-04  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Attempt to implement background transition
+
+2014-11-03  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Merge background.set_default_config and background.set_monitor_config, transform Background to ref type
+
+2015-01-17  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-12-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-12-10  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge fix for lp-1366534 and lp-1377743
+
+2014-11-27  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	lp1366534: at-spi process
+
+2014-10-10  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Kill "indicator-services-start" before gtk_main_quit (LP: #1377743)
+
+2014-12-10  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge allow-debugging-option branch
+
+2014-11-28  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	allow-debugging option: enable debug messages
+
+2014-11-14  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	New option: allow-debugging, disabling GtkInspector bindings
+
+2014-12-05  Doug Torrance  <dtorrance@monmouthcollege.edu>
+
+	Add badges for Mate and Window Maker
+
+2014-11-23  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-11-13  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-10-05  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-09-27  Sean Davis  <smd.seandavis@gmail.com>
+
+	Merge one-window-layout branch
+
+2014-09-24  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Invalid #panel_window style class
+
+2014-09-01  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	Hiding empty panel, keep screen_overlay hidden before gtk_main()
+
+2014-08-31  Andrew P.  <pan.pav.7c5@gmail.com>
+
+	One-window layout
+
+2014-09-11  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-09-02  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
+2014-08-28  Launchpad Translations on behalf of lightdm-gtk-greeter-team
+
+	Launchpad automatic translations update.
+
 2014-08-20  Sean Davis  <smd.seandavis@gmail.com>
 
 	Updated Makefile.am

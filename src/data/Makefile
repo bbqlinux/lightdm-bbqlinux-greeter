@@ -214,7 +214,7 @@ AUTOMAKE = ${SHELL} /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/missin
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector --param=ssp-buffer-size=4
+CFLAGS = -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong --param=ssp-buffer-size=4
 CPP = gcc -E
 CPPFLAGS = -D_FORTIFY_SOURCE=2
 CYGPATH_W = echo
@@ -251,7 +251,7 @@ INTLTOOL_V_MERGE = $(INTLTOOL__v_MERGE_$(V))
 INTLTOOL_V_MERGE_OPTIONS = $(intltool__v_merge_options_$(V))
 INTLTOOL__v_MERGE_ = $(INTLTOOL__v_MERGE_$(AM_DEFAULT_VERBOSITY))
 INTLTOOL__v_MERGE_0 = @echo "  ITMRG " $@;
-INTROSPECTION_CFLAGS = -pthread -I/usr/include/gobject-introspection-1.0 -I/usr/lib/libffi-3.1/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
+INTROSPECTION_CFLAGS = -pthread -I/usr/include/gobject-introspection-1.0 -I/usr/lib/libffi-3.2.1/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include 
 INTROSPECTION_COMPILER = /usr/bin/g-ir-compiler
 INTROSPECTION_GENERATE = /usr/bin/g-ir-generate
 INTROSPECTION_GIRDIR = /usr/share/gir-1.0
@@ -270,8 +270,8 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIBX11_CFLAGS = 
 LIBX11_LIBS = -lX11 
-LIBXKLAVIER_CFLAGS = 
-LIBXKLAVIER_LIBS = 
+LIBXKLAVIER_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 
+LIBXKLAVIER_LIBS = -lxklavier 
 LIGHTDMGOBJECT_CFLAGS = -pthread -I/usr/include/lightdm-gobject-1 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libxml2 
 LIGHTDMGOBJECT_LIBS = -llightdm-gobject-1 
 LIPO = 
@@ -292,10 +292,10 @@ OTOOL64 =
 PACKAGE = lightdm-gtk-greeter
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = lightdm-gtk-greeter
-PACKAGE_STRING = lightdm-gtk-greeter 1.9.0
+PACKAGE_STRING = lightdm-gtk-greeter 2.0.0
 PACKAGE_TARNAME = lightdm-gtk-greeter
 PACKAGE_URL = 
-PACKAGE_VERSION = 1.9.0
+PACKAGE_VERSION = 2.0.0
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
@@ -307,7 +307,7 @@ SHELL = /bin/sh
 STRIP = strip
 UNITY_INDICATORDIR = 
 USE_NLS = yes
-VERSION = 1.9.0
+VERSION = 2.0.0
 WARN_CFLAGS =  -Wall -Wstrict-prototypes -Wnested-externs -Werror=missing-prototypes -Werror=implicit-function-declaration -Werror=pointer-arith -Werror=init-self -Werror=format=2 -Werror=missing-include-dirs 
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /android/bbqlinux/github/lightdm-bbqlinux-greeter/src/data
